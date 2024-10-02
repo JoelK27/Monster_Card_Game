@@ -1,0 +1,93 @@
+@startuml
+
+' Definition der abstrakten Klasse Card
+class Card {
+  - name: String
+  - damage: int
+  - elementType: String
+  + getDamage(): int
+}
+
+' Definition von MonsterCard und SpellCard, die von Card erben
+class MonsterCard {
+  - monsterType: String
+}
+MonsterCard --|> Card
+
+class SpellCard {
+  - spellEffect: String
+}
+SpellCard --|> Card
+
+' Definition der Klasse User
+class User {
+  - username: String
+  - password: String
+  - coins: int
+  - stack: List<Card>
+  - deck: Deck
+  - elo: int
+  + register(): void
+  + login(): AuthenticationToken
+  + acquirePackage(package: Package): void
+  + selectBestCards(): Deck
+  + battle(opponent: User): BattleArena
+  + tradeCard(card: Card, otherUser: User): void
+  + updateElo(points: int): void
+}
+
+' Assoziation zwischen User und Deck
+User --> Deck : has
+
+' Assoziation zwischen User und Package
+User --> Package : acquires
+
+' Aggregation: User besitzt eine Sammlung von Cards (in Stack und Deck)
+User "1" o-- "0*" Card : manages
+
+' Definition der Klasse Deck
+class Deck {
+  - cards: List<Card>
+  + addCard(card: Card): void
+  + removeCard(card: Card): void
+  + getBestCards(): List<Card>
+}
+
+' Definition der Klasse Package
+class Package {
+  - cards: List<Card>
+  + getCards(): List<Card>
+}
+
+' Definition der Klasse Battle
+class BattleArena {
+  - player1: User
+  - player2: User
+  - winner: User
+  + startBattle(player1: User, player2: User): User
+}
+
+' Assoziation zwischen User und BattleArena (Benutzer können gegeneinander kämpfen)
+User --> BattleArena : participates in
+
+' Definition der Klasse Scoreboard
+class Scoreboard {
+  - players: List<User>
+  + displayRankings(): void
+}
+
+' Assoziation zwischen Scoreboard und User (Scoreboard zeigt Rankings von Usern an)
+Scoreboard --> User : displays rankings for
+
+' Definition der Klasse AuthenticationToken
+class AuthenticationToken {
+  - token: String
+  - expiration: DateTime
+  - user: User
+  + validateToken(): boolean
+}
+
+' Assoziation zwischen User und AuthenticationToken (Sicherheitsprüfung)
+User --> AuthenticationToken : has
+
+@enduml
