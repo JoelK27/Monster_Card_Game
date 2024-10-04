@@ -1,11 +1,14 @@
-package at.technikum_wien;
+package at.technikum_wien.models;
+
+import lombok.Getter;
 
 import java.time.LocalDateTime;
 
 public class AuthenticationToken {
-    private String token;
-    private LocalDateTime expiration;
-    private User user;
+    @Getter
+    private final String token;
+    private final LocalDateTime expiration;
+    private final User user;
 
     public AuthenticationToken(User user) {
         this.user = user;
@@ -22,7 +25,4 @@ public class AuthenticationToken {
         return LocalDateTime.now().isBefore(expiration);
     }
 
-    public String getToken() {
-        return token;
-    }
 }

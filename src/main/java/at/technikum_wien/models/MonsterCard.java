@@ -1,5 +1,8 @@
-package at.technikum_wien;
+package at.technikum_wien.models;
 
+import lombok.Getter;
+
+@Getter
 public class MonsterCard extends Card {
     private String monsterType;
 
@@ -8,8 +11,5 @@ public class MonsterCard extends Card {
         this.monsterType = monsterType;
     }
 
-    public String getMonsterType() {
-        return monsterType;
-    }
 }
 

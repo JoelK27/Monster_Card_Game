@@ -1,14 +1,21 @@
-package at.technikum_wien;
+package at.technikum_wien.models;
+
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class User {
-    private String username;
-    private String password;
+    @Getter
+    private final String username;
+    @Getter
+    private final String password;
     private int coins;
-    private List<Card> stack;
-    private Deck deck;
+    private final List<Card> stack;
+    @Getter
+    private final Deck deck;
+    @Getter
     private int elo;
 
     public User(String username, String password) {
@@ -54,16 +61,5 @@ public class User {
         this.elo += points;
     }
 
-    public String getUsername() {
-        return username;
-    }
-
-    public int getElo() {
-        return elo;
-    }
-
-    public Deck getDeck() {
-        return deck;
-    }
 }
 

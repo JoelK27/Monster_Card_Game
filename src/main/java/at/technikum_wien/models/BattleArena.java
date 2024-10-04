@@ -1,8 +1,11 @@
-package at.technikum_wien;
+package at.technikum_wien.models;
+
+import lombok.Getter;
 
 public class BattleArena {
-    private User player1;
-    private User player2;
+    private final User player1;
+    private final User player2;
+    @Getter
     private User winner;
 
     public BattleArena(User player1, User player2) {
@@ -24,7 +27,4 @@ public class BattleArena {
         return winner;
     }
 
-    public User getWinner() {
-        return winner;
-    }
 }

@@ -1,5 +1,8 @@
 package at.technikum_wien;
 
+import at.technikum_wien.models.*;
+import at.technikum_wien.models.Package;
+
 import java.util.Arrays;
 
 public class Main {
@@ -12,7 +15,7 @@ public class Main {
         MonsterCard card5 = new MonsterCard("Orc", 25, "Earth", "Orc");
 
         // Create a package of cards
-        Package cardPackage = new Package(Arrays.asList(card1, card2, card3, card4, card5));
+        at.technikum_wien.models.Package cardPackage = new Package(Arrays.asList(card1, card2, card3, card4, card5));
 
         // Create two users
         User player1 = new User("Player1", "password123");

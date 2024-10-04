@@ -1,7 +1,10 @@
-package at.technikum_wien;
+package at.technikum_wien.models;
+
+import lombok.Getter;
 
 import java.util.List;
 
+@Getter
 public class Package {
     private List<Card> cards;
 
@@ -9,7 +12,4 @@ public class Package {
         this.cards = cards;
     }
 
-    public List<Card> getCards() {
-        return cards;
-    }
 }

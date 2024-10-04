@@ -1,5 +1,8 @@
-package at.technikum_wien;
+package at.technikum_wien.models;
 
+import lombok.Getter;
+
+@Getter
 public abstract class Card {
     protected String name;
     protected int damage;
@@ -11,15 +14,4 @@ public abstract class Card {
         this.elementType = elementType;
     }
 
-    public int getDamage() {
-        return damage;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getElementType() {
-        return elementType;
-    }
 }

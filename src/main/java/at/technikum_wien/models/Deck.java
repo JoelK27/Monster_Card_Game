@@ -1,8 +1,13 @@
-package at.technikum_wien;
+package at.technikum_wien.models;
+
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Setter
+@Getter
 public class Deck {
     private List<Card> cards;
 
@@ -23,11 +28,4 @@ public class Deck {
         return cards.subList(0, Math.min(4, cards.size()));  // Just return first 4 cards for now
     }
 
-    public void setCards(List<Card> cards) {
-        this.cards = cards;
-    }
-
-    public List<Card> getCards() {
-        return cards;
-    }
 }

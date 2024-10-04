@@ -1,5 +1,8 @@
-package at.technikum_wien;
+package at.technikum_wien.models;
 
+import lombok.Getter;
+
+@Getter
 public class SpellCard extends Card {
     private String spellEffect;
 
@@ -8,7 +11,4 @@ public class SpellCard extends Card {
         this.spellEffect = spellEffect;
     }
 
-    public String getSpellEffect() {
-        return spellEffect;
-    }
 }
