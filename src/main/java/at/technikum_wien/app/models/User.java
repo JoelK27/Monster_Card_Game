@@ -1,5 +1,6 @@
-package at.technikum_wien.models;
+package at.technikum_wien.app.models;
 
+import at.technikum_wien.app.business.BattleArena;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,17 +9,26 @@ import java.util.List;
 
 public class User {
     @Getter
-    private final String username;
+    @Setter
+    private Integer ID;
+    private static int idCounter = 1;  // Statische Variable zur Verwaltung der IDs
     @Getter
-    private final String password;
+    @Setter
+    private String username;
+    @Getter
+    @Setter
+    private String password;
     private int coins;
-    private final List<Card> stack;
+    private List<Card> stack;
     @Getter
-    private final Deck deck;
+    private Deck deck;
     @Getter
+    @Setter
     private int elo;
 
     public User(String username, String password) {
+        this.ID = idCounter;  // Weist die aktuelle ID zu
+        idCounter++;
         this.username = username;
         this.password = password;
         this.coins = 20;  // Starting coins
@@ -60,6 +70,5 @@ public class User {
     public void updateElo(int points) {
         this.elo += points;
     }
-
 }
 

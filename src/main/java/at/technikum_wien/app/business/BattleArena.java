@@ -1,10 +1,11 @@
-package at.technikum_wien.models;
+package at.technikum_wien.app.business;
 
+import at.technikum_wien.app.models.User;
 import lombok.Getter;
 
 public class BattleArena {
-    private final User player1;
-    private final User player2;
+    private User player1;
+    private User player2;
     @Getter
     private User winner;
 

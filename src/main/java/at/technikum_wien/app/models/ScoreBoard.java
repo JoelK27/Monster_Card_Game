@@ -1,4 +1,4 @@
-package at.technikum_wien.models;
+package at.technikum_wien.app.models;
 
 import java.util.List;
 
