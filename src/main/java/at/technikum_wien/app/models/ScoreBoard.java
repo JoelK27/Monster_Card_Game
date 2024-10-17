@@ -10,10 +10,10 @@ public class ScoreBoard {
     }
 
     public void displayRankings() {
-        players.sort((u1, u2) -> u2.getElo() - u1.getElo());
+        players.sort((u1, u2) -> u2.getScore() - u1.getScore());
         System.out.println("Scoreboard Rankings:");
         for (User player : players) {
-            System.out.println(player.getUsername() + ": " + player.getElo());
+            System.out.println(player.getUsername() + ": " + player.getScore());
         }
     }
 }

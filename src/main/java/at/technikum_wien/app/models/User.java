@@ -1,6 +1,8 @@
 package at.technikum_wien.app.models;
 
 import at.technikum_wien.app.business.BattleArena;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -24,9 +26,13 @@ public class User {
     private Deck deck;
     @Getter
     @Setter
-    private int elo;
+    private int score;
+    @Getter
+    @Setter
+    private String token;
 
-    public User(String username, String password) {
+    @JsonCreator
+    public User(@JsonProperty("Username") String username, @JsonProperty("Password") String password) {
         this.ID = idCounter;  // Weist die aktuelle ID zu
         idCounter++;
         this.username = username;
@@ -34,12 +40,8 @@ public class User {
         this.coins = 20;  // Starting coins
         this.stack = new ArrayList<>();
         this.deck = new Deck();
-        this.elo = 100;   // Starting ELO
-    }
-
-    public AuthenticationToken login() {
-        // Placeholder for authentication logic
-        return new AuthenticationToken(this);
+        this.score = 100; // Starting Score
+        this.token = null;
     }
 
     public void acquirePackage(Package cardPackage) {
@@ -67,8 +69,8 @@ public class User {
         // Placeholder for card trading logic
     }
 
-    public void updateElo(int points) {
-        this.elo += points;
+    public void updateScore(int points) {
+        this.score += points;
     }
 }
 

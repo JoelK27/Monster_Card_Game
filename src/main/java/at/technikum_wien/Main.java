@@ -41,10 +41,12 @@ public class Main {
 */
 package at.technikum_wien;
 
+import at.technikum_wien.app.controller.SessionController;
 import at.technikum_wien.httpserver.server.Server;
 import at.technikum_wien.httpserver.utils.Router;
 import at.technikum_wien.app.service.echo.EchoService;
-import at.technikum_wien.app.service.UserService;
+import at.technikum_wien.app.service.User.UserService;
+import at.technikum_wien.app.service.Session.SessionService;
 
 import java.io.IOException;
 
@@ -63,6 +65,7 @@ public class Main {
         Router router = new Router();
         router.addService("/users", new UserService());
         router.addService("/echo", new EchoService());
+        router.addService("/sessions", new SessionService());
 
         return router;
     }

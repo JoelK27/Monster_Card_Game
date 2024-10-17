@@ -18,12 +18,12 @@ public class BattleArena {
         // Placeholder logic for battle (simple random winner for now)
         if (Math.random() > 0.5) {
             winner = player1;
-            player1.updateElo(3);
-            player2.updateElo(-5);
+            player1.updateScore(3);
+            player2.updateScore(-5);
         } else {
             winner = player2;
-            player2.updateElo(3);
-            player1.updateElo(-5);
+            player2.updateScore(3);
+            player1.updateScore(-5);
         }
         return winner;
     }

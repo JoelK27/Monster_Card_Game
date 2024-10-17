@@ -4,14 +4,12 @@ import at.technikum_wien.httpserver.http.ContentType;
 import at.technikum_wien.httpserver.http.HttpStatus;
 import at.technikum_wien.httpserver.server.Request;
 import at.technikum_wien.httpserver.server.Response;
-import at.technikum_wien.app.controller.Controller;
 //import at.fhtw.sampleapp.dal.UnitOfWork;
 //import at.fhtw.sampleapp.dal.repository.UserRepository;
 import at.technikum_wien.app.models.User;
-import at.technikum_wien.app.service.UserDummyDAL;
+import at.technikum_wien.app.service.User.UserDummyDAL;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import java.util.Collection;
 import java.util.List;
 
 public class UserController extends Controller {
@@ -19,7 +17,7 @@ public class UserController extends Controller {
 
     public UserController() {
         // Dummy-Daten für Tests, stattdessen sollte das Repository-Pattern verwendet werden.
-        this.userDAL = new UserDummyDAL();
+        this.userDAL = UserDummyDAL.getInstance(); // Hole die Singleton-Instanz
     }
 
     // GET /user/:id
@@ -69,14 +67,28 @@ public class UserController extends Controller {
     // POST /user
     public Response addUser(Request request) {
         try {
-            // request.getBody() => "{ \"id\": 4, \"username\": \"PlayerFour\", \"score\": 120 }"
+            // Deserialisiere den Request-Body in ein User-Objekt
             User user = this.getObjectMapper().readValue(request.getBody(), User.class);
-            this.userDAL.addUser(user);
 
+            // Überprüfen, ob der Benutzer bereits existiert
+            List<User> existingUsers = this.userDAL.getUsers();
+            for (User existingUser : existingUsers) {
+                if (existingUser.getUsername().equals(user.getUsername())) {
+                    // Benutzer existiert bereits
+                    return new Response(
+                            HttpStatus.CONFLICT,  // HTTP 409 - Konflikt
+                            ContentType.JSON,
+                            "{ \"message\": \"User already exists\" }"
+                    );
+                }
+            }
+
+            // Wenn der Benutzer nicht existiert, füge ihn hinzu
+            this.userDAL.addUser(user);
             return new Response(
                     HttpStatus.CREATED,
                     ContentType.JSON,
-                    "{ \"message\": \"Success\" }"
+                    "{ \"message\": \"User added successfully\" }"
             );
         } catch (JsonProcessingException e) {
             e.printStackTrace();
@@ -145,6 +157,7 @@ public class UserController extends Controller {
                 "{ \"message\": \"User deleted successfully\" }"
         );
     }
+
 }
 
 

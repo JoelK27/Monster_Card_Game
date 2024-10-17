@@ -1,19 +1,24 @@
-package at.technikum_wien.app.service;
+package at.technikum_wien.app.service.User;
 
 import at.technikum_wien.app.models.User;
 
-import java.net.IDN;
 import java.util.ArrayList;
 import java.util.List;
 
 public class UserDummyDAL {
+    private static UserDummyDAL instance;
     private List<User> users;
 
     public UserDummyDAL() {
         users = new ArrayList<>();
-        users.add(new User("Joel", "PlayerOne"));
-        users.add(new User("Liam", "PlayerTwo"));
-        users.add(new User("Pumba", "PlayerThree"));
+        users.add(new User("kienboec", "daniel"));
+    }
+
+    public static UserDummyDAL getInstance() {
+        if (instance == null) {
+            instance = new UserDummyDAL();
+        }
+        return instance;
     }
 
     // GET /user/:id
@@ -43,12 +48,22 @@ public class UserDummyDAL {
                 .findFirst()
                 .ifPresent(user -> {
                     user.setUsername(updatedUser.getUsername());
-                    user.setElo(updatedUser.getElo());
+                    user.setScore(updatedUser.getScore());
                 });
     }
 
     // DELETE /user/:id
     public void deleteUser(Integer ID) {
         users.removeIf(user -> user.getID() == ID);
+    }
+
+    // Methode zum Abrufen eines Benutzers nach Benutzernamen
+    public User getUserByUsername(String username) {
+        for (User user : users) {
+            if (user.getUsername().equals(username)) {
+                return user; // Benutzer gefunden
+            }
+        }
+        return null; // Benutzer nicht gefunden
     }
 }
