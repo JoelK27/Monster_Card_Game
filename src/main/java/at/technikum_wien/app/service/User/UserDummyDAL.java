@@ -11,7 +11,9 @@ public class UserDummyDAL {
 
     public UserDummyDAL() {
         users = new ArrayList<>();
-        users.add(new User("kienboec", "daniel"));
+        users.add(new User("Joel", "BALL"));
+        users.add(new User("Aladin", "JasmineAndGenie"));
+        users.add(new User("Simba", "TimonAndPumba"));
     }
 
     public static UserDummyDAL getInstance() {
