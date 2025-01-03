@@ -17,10 +17,10 @@ public class TransactionsService implements Service {
 
     @Override
     public Response handleRequest(Request request) {
-        // Prüfen, ob POST-Anfrage für das Hinzufügen eines neuen Benutzers
-        if (request.getMethod() == Method.POST) {
-            return this.transactionsController.handleTransactions(request);
-        }
+        // Prüfen, ob POST-Anfrage für das Erwerben eines Pakets
+        //if (request.getMethod() == Method.POST) {
+            //return this.transactionsController.acquirePackage(request);
+        //}
 
         // Wenn keine der Methoden zutrifft, wird BAD_REQUEST zurückgegeben
         return new Response(

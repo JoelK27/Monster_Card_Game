@@ -18,8 +18,12 @@ public class SessionService implements Service {
     @Override
     public Response handleRequest(Request request) {
         // Prüfen, ob POST-Anfrage für das Einloggen eines Benutzers
-        if (request.getMethod() == Method.POST && "/sessions".equals(request.getPathname())) {
+        if (request.getMethod() == Method.POST && "/sessions/login".equals(request.getPathname())) {
             return this.sessionController.login(request);
+        }
+        // Prüfen, ob POST-Anfrage für das Registrieren eines Benutzers
+        else if (request.getMethod() == Method.POST && "/sessions/register".equals(request.getPathname())) {
+            return this.sessionController.register(request);
         }
 
         // Wenn keine der Methoden zutrifft, wird BAD_REQUEST zurückgegeben

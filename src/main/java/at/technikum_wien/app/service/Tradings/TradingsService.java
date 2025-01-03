@@ -17,19 +17,21 @@ public class TradingsService implements Service {
 
     @Override
     public Response handleRequest(Request request) {
-        // Prüfen, ob allgemeine GET-Anfrage für alle Benutzer
+        // Prüfen, ob allgemeine GET-Anfrage für alle Handelsdeals
         if (request.getMethod() == Method.GET) {
-            return this.tradingsController.handleTradings(request);
-            // Alternativ könntest du hier die Repository-Version verwenden:
-            // return this.userController.getUsersPerRepository();
+            return this.tradingsController.getTradingDeals(request);
         }
-        // Prüfen, ob POST-Anfrage für das Hinzufügen eines neuen Benutzers
-        else if (request.getMethod() == Method.POST) {
-            return this.tradingsController.handleTradings(request);
+        // Prüfen, ob POST-Anfrage für das Erstellen eines neuen Handelsdeals
+        else if (request.getMethod() == Method.POST && request.getPathParts().size() == 1) {
+            return this.tradingsController.createTradingDeal(request);
         }
-        // Prüfen, ob DELETE-Anfrage für das Löschen eines Benutzers (z.B. /user/1)
+        // Prüfen, ob POST-Anfrage für das Handeln eines bestehenden Handelsdeals
+        else if (request.getMethod() == Method.POST && request.getPathParts().size() > 1) {
+            return this.tradingsController.trade(request);
+        }
+        // Prüfen, ob DELETE-Anfrage für das Löschen eines Handelsdeals
         else if (request.getMethod() == Method.DELETE && request.getPathParts().size() > 1) {
-            return this.tradingsController.handleTradings(request);
+            return this.tradingsController.deleteTradingDeal(request);
         }
 
         // Wenn keine der Methoden zutrifft, wird BAD_REQUEST zurückgegeben

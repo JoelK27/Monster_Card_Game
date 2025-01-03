@@ -1,0 +1,46 @@
+@startuml
+actor Player1
+actor Player2
+participant Server
+participant Card1 as "Player 1's Card"
+participant Card2 as "Player 2's Card"
+
+Player1 -> Server: Request Battle
+Player2 -> Server: Request Battle
+Server -> Player1: Acknowledge Request
+Server -> Player2: Acknowledge Request
+
+loop Battle Rounds (up to 100)
+    Server -> Card1: Select random card from Player 1's deck
+    Server -> Card2: Select random card from Player 2's deck
+    Server -> Server: Check special rules (e.g., Goblins fear Dragons)
+    alt Both cards are monsters
+        Server -> Server: Compare damage values
+    else One or both are spell cards
+        Server -> Server: Apply element effectiveness
+        Server -> Server: Compare adjusted damage values
+    end
+
+    alt Player 1's card wins
+        Server -> Player1: Transfer Card2 to Player 1's deck
+        Server -> Player2: Remove Card2 from deck
+    else Player 2's card wins
+        Server -> Player2: Transfer Card1 to Player 2's deck
+        Server -> Player1: Remove Card1 from deck
+    else Draw
+        Server -> Server: No cards transferred
+    end
+end
+
+alt Deck of Player1 is empty
+    Server -> Player2: Declare Player 2 as winner
+else Deck of Player2 is empty
+    Server -> Player1: Declare Player 1 as winner
+else 100 rounds completed
+    Server -> Server: Battle ends in a draw
+end
+
+Server -> Server: Update ELO scores for both players
+Server -> Player1: Send detailed battle log
+Server -> Player2: Send detailed battle log
+@enduml

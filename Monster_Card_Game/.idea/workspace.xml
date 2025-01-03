@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="a2198653-db7e-42f9-82d9-d4420bbf570b" name="Changes" comment="" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="UML Class" />
+        <option value="Python Script" />
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;JoelK27&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;git@github.com:JoelK27/Monster_Card_Game.git&quot;,
+    &quot;accountId&quot;: &quot;3db1e440-68b2-45fc-a7c1-1f9ff78701c9&quot;
+  }
+}</component>
+  <component name="KubernetesApiPersistence">{}</component>
+  <component name="KubernetesApiProvider">{
+  &quot;isMigrated&quot;: true
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 5
+}</component>
+  <component name="ProjectId" id="2mZG9FOSHCm4Kan3meJAFS2KkEs" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="1" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.Main.executor": "Run",
+    "Database Script.Initialize-Postgres-Script.sql.executor": "Run",
+    "DefaultPlantUmlFileTemplate": "UML Class",
+    "Maven.Monster_Card_Game [install].executor": "Run",
+    "Maven.Monster_Card_Game [package].executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "main",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Users/Startklar/Desktop/3. Semester/Software Engineering/Monster_Card_Game",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "onboarding.tips.debug.path": "C:/Users/Startklar/Desktop/3. Semester/Software Engineering/Monster_Card_Game/src/main/java/at/technikum_wien/Main.java",
+    "project.structure.last.edited": "Modules",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.2",
+    "settings.editor.selected.configurable": "reference.settings.project.maven.repository.indices",
+    "vue.rearranger.settings.migration": "true"
+  },
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "postgresql"
+    ],
+    "RunConfigurationTargetLRU": [
+      "714496ad-1030-4ddb-8c33-14a5ed12824a",
+      "207ef9d7-1e7f-4e0e-abd7-2ec8fd6dcb49",
+      "82c4f24d-7a72-4650-92c9-960d98886b8c"
+    ]
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\Startklar\Desktop\3. Semester\Software Engineering\Monster_Card_Game\src" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\Startklar\Desktop\3. Semester\Software Engineering\Monster_Card_Game\src\UML" />
+      <recent name="C:\Users\Startklar\Desktop\3. Semester\Software Engineering\Monster_Card_Game" />
+      <recent name="C:\Users\Startklar\Desktop\3. Semester\Software Engineering\Monster_Card_Game\src\main\java\at\technikum_wien\app" />
+    </key>
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="at.technikum_wien.app.dal.repository" />
+      <recent name="at.technikum_wien.app.dal" />
+      <recent name="at.technikum_wien.app.controller" />
+      <recent name="at.technikum_wien.httpserver.utils" />
+      <recent name="at.technikum_wien.httpserver.http" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="Initialize-Postgres-Script.sql" type="DatabaseScript" editBeforeRun="true" nameIsGenerated="true">
+      <script-file value="$PROJECT_DIR$/Initialize-Postgres-Script.sql" />
+      <script-mode>FILE</script-mode>
+      <data-source id="82c4f24d-7a72-4650-92c9-960d98886b8c" />
+      <method v="2" />
+    </configuration>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-b114ca120d71-intellij.indexing.shared.core-IU-242.21829.142" />
+        <option value="bundled-js-predefined-d6986cc7102b-7c0b70fcd90d-JavaScript-IU-242.21829.142" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="a2198653-db7e-42f9-82d9-d4420bbf570b" name="Changes" comment="" />
+      <created>1727276531811</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1727276531811</updated>
+      <workItem from="1727276532983" duration="284000" />
+      <workItem from="1727276827682" duration="1113000" />
+      <workItem from="1727278494936" duration="232000" />
+      <workItem from="1727363420057" duration="1400000" />
+      <workItem from="1727364996139" duration="218000" />
+      <workItem from="1727426831399" duration="4926000" />
+      <workItem from="1727870966784" duration="320000" />
+      <workItem from="1728040533437" duration="2096000" />
+      <workItem from="1728405703457" duration="596000" />
+      <workItem from="1728484597623" duration="2288000" />
+      <workItem from="1728636799376" duration="1506000" />
+      <workItem from="1728646223993" duration="13000" />
+      <workItem from="1728743088518" duration="73000" />
+      <workItem from="1728834704377" duration="184000" />
+      <workItem from="1728836194332" duration="2222000" />
+      <workItem from="1728840305444" duration="26000" />
+      <workItem from="1728842432009" duration="29000" />
+      <workItem from="1728923498086" duration="3687000" />
+      <workItem from="1729010014566" duration="821000" />
+      <workItem from="1729078609208" duration="2179000" />
+      <workItem from="1729181596527" duration="2169000" />
+      <workItem from="1729183798586" duration="4450000" />
+      <workItem from="1729244447695" duration="2869000" />
+      <workItem from="1729247728034" duration="233000" />
+      <workItem from="1729250089989" duration="2339000" />
+      <workItem from="1729681876808" duration="31000" />
+      <workItem from="1730895295809" duration="2362000" />
+      <workItem from="1730898485928" duration="626000" />
+      <workItem from="1731067329730" duration="3913000" />
+      <workItem from="1731074568878" duration="543000" />
+      <workItem from="1731076143540" duration="15000" />
+      <workItem from="1731263410184" duration="578000" />
+      <workItem from="1731503092417" duration="17000" />
+      <workItem from="1731679218972" duration="3438000" />
+      <workItem from="1735842719524" duration="97000" />
+      <workItem from="1735923146248" duration="474000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
+  </component>
+</project>

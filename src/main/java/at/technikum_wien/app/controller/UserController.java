@@ -4,12 +4,13 @@ import at.technikum_wien.httpserver.http.ContentType;
 import at.technikum_wien.httpserver.http.HttpStatus;
 import at.technikum_wien.httpserver.server.Request;
 import at.technikum_wien.httpserver.server.Response;
-//import at.fhtw.sampleapp.dal.UnitOfWork;
-//import at.fhtw.sampleapp.dal.repository.UserRepository;
+import at.technikum_wien.app.dal.UnitOfWork;
+import at.technikum_wien.app.dal.repository.UserRepository;
 import at.technikum_wien.app.models.User;
 import at.technikum_wien.app.service.User.UserDummyDAL;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+import java.util.Collection;
 import java.util.List;
 
 public class UserController extends Controller {
@@ -34,6 +35,29 @@ public class UserController extends Controller {
             );
         } catch (JsonProcessingException e) {
             e.printStackTrace();
+            return new Response(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    ContentType.JSON,
+                    "{ \"message\" : \"Internal Server Error\" }"
+            );
+        }
+    }
+
+    // Methode zum Abrufen eines Benutzers basierend auf einem Token (repository-basiert)
+    public Response getUserByToken(String token) {
+        UnitOfWork unitOfWork = new UnitOfWork();
+        try (unitOfWork) {
+            User usersData = new UserRepository(unitOfWork).findUserByToken(token);
+            String usersDataJSON = this.getObjectMapper().writeValueAsString(usersData);
+            unitOfWork.commitTransaction();
+            return new Response(
+                    HttpStatus.OK,
+                    ContentType.JSON,
+                    usersDataJSON
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+            unitOfWork.rollbackTransaction();
             return new Response(
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     ContentType.JSON,
@@ -100,7 +124,7 @@ public class UserController extends Controller {
         }
     }
 
-    /*
+
     // GET /user (repository-basiert)
     public Response getUsersPerRepository() {
         UnitOfWork unitOfWork = new UnitOfWork();
@@ -124,7 +148,6 @@ public class UserController extends Controller {
             );
         }
     }
-    */
 
     // PUT /user/:id
     public Response updateUser(String id, Request request) {

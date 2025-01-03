@@ -17,9 +17,9 @@ public class PackageService implements Service {
 
     @Override
     public Response handleRequest(Request request) {
-        // Prüfen, ob POST-Anfrage für das Hinzufügen eines neuen Benutzers
+        // Prüfen, ob POST-Anfrage für das Erstellen eines neuen Pakets
         if (request.getMethod() == Method.POST) {
-            return this.packageController.acquirePackages(request);
+            return this.packageController.createPackage(request);
         }
 
         // Wenn keine der Methoden zutrifft, wird BAD_REQUEST zurückgegeben
