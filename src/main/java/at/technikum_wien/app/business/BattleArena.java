@@ -88,8 +88,6 @@ public class BattleArena {
 
             if (monster1.getMonsterType().equals("Knight") && card2 instanceof SpellCard && ((SpellCard) card2).getSpellEffect().equals("Water")) {
                 battleLog.add("Knight drowns instantly due to heavy armor and WaterSpell.");
-                player2.getDeck().addCard(card1);
-                player1.getDeck().removeCard(card1);
                 return true;
             }
 
