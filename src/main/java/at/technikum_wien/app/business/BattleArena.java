@@ -11,7 +11,9 @@ import java.util.Collections;
 import java.util.List;
 
 public class BattleArena {
+    @Getter
     private User player1;
+    @Getter
     private User player2;
     @Getter
     private User winner;
@@ -53,12 +55,16 @@ public class BattleArena {
             }
         }
 
+        if (round >= 100) {
+            battleLog.add("The battle reached the round limit and is a draw.");
+            return null;
+        }
+
         if (player1.getDeck().getCards().isEmpty()) {
             winner = player2;
         } else if (player2.getDeck().getCards().isEmpty()) {
             winner = player1;
         } else {
-            battleLog.add("The battle is a draw.");
             return null;
         }
 
@@ -71,7 +77,7 @@ public class BattleArena {
         return deck.get(0);
     }
 
-    private boolean isSpecialRule(Card card1, Card card2) {
+    boolean isSpecialRule(Card card1, Card card2) {
         if (card1 instanceof MonsterCard && card2 instanceof MonsterCard) {
             MonsterCard monster1 = (MonsterCard) card1;
             MonsterCard monster2 = (MonsterCard) card2;
@@ -86,25 +92,30 @@ public class BattleArena {
                 return true;
             }
 
-            if (monster1.getMonsterType().equals("Knight") && card2 instanceof SpellCard && ((SpellCard) card2).getSpellEffect().equals("Water")) {
+            if (monster1.getMonsterType().equals("FireElf") && monster2.getMonsterType().equals("Dragon")) {
+                battleLog.add("FireElf evades Dragon's attack.");
+                return true;
+            }
+        }
+
+        if (card1 instanceof MonsterCard && card2 instanceof SpellCard) {
+            MonsterCard monster1 = (MonsterCard) card1;
+            SpellCard spell1 = (SpellCard) card2;
+
+            if (monster1.getMonsterType().equals("Knight") && ((SpellCard) spell1).getSpellEffect().equals("Water")) {
                 battleLog.add("Knight drowns instantly due to heavy armor and WaterSpell.");
                 return true;
             }
 
-            if (monster1.getMonsterType().equals("Kraken") && card2 instanceof SpellCard) {
+            if (monster1.getMonsterType().equals("Kraken")) {
                 battleLog.add("Kraken is immune to spells.");
-                return true;
-            }
-
-            if (monster1.getMonsterType().equals("FireElf") && monster2.getMonsterType().equals("Dragon")) {
-                battleLog.add("FireElf evades Dragon's attack.");
                 return true;
             }
         }
         return false;
     }
 
-    private double calculateDamage(Card attacker, Card defender) {
+    double calculateDamage(Card attacker, Card defender) {
         double damage = attacker.getDamage();
         if (attacker instanceof SpellCard || defender instanceof SpellCard) {
             if (attacker.getElementType().equals("Water") && defender.getElementType().equals("Fire")) {
