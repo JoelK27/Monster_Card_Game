@@ -18,8 +18,17 @@ public class SessionService implements Service {
     @Override
     public Response handleRequest(Request request) {
         // Prüfen, ob POST-Anfrage für das Einloggen eines Benutzers
-        if (request.getMethod() == Method.POST && "/sessions/login".equals(request.getPathname())) {
-            return this.sessionController.login(request);
+        if (request.getMethod() == Method.POST && "/sessions".equals(request.getPathname())) {
+            // Prüfen, ob der Body des Requests Anmeldeinformationen enthält
+            if (request.getBody().contains("Username") && request.getBody().contains("Password")) {
+                return this.sessionController.login(request);
+            } else {
+                return new Response(
+                        HttpStatus.BAD_REQUEST,
+                        ContentType.JSON,
+                        "{ \"message\": \"Bad Request: Missing Username or Password\" }"
+                );
+            }
         }
         // Prüfen, ob POST-Anfrage für das Registrieren eines Benutzers
         else if (request.getMethod() == Method.POST && "/sessions/register".equals(request.getPathname())) {

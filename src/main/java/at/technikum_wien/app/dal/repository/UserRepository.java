@@ -50,6 +50,21 @@ public class UserRepository implements RepositoryInterface<Integer, User> {
         }
     }
 
+    // Find user by username
+    public User findUserByUsername(String username) {
+        try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement(
+                "SELECT * FROM users WHERE username = ?")) {
+            preparedStatement.setString(1, username);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                return mapResultSetToUser(resultSet);
+            }
+            return null;
+        } catch (SQLException e) {
+            throw new DataAccessException("Failed to find user by username", e);
+        }
+    }
+
     // Find all users
     public Collection<User> findAllUsers() {
         try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement(

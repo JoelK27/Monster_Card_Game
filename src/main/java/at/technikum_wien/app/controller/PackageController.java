@@ -1,6 +1,8 @@
 package at.technikum_wien.app.controller;
 
 import at.technikum_wien.app.dal.UnitOfWork;
+import at.technikum_wien.app.dal.repository.CardRepository;
+import at.technikum_wien.app.dal.repository.PackageRepository;
 import at.technikum_wien.app.dal.repository.UserRepository;
 import at.technikum_wien.app.models.Card;
 import at.technikum_wien.app.models.Package;
@@ -10,15 +12,12 @@ import at.technikum_wien.httpserver.http.HttpStatus;
 import at.technikum_wien.httpserver.server.Request;
 import at.technikum_wien.httpserver.server.Response;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class PackageController extends Controller {
-    private static final List<Package> packages = new ArrayList<>();
 
-    public Response createPackage(Request request) {
-        try {
-            UnitOfWork unitOfWork = new UnitOfWork();
+     public Response createPackage(Request request) {
+        try (UnitOfWork unitOfWork = new UnitOfWork()) {
             String token = request.getHeaders().getHeader("Authorization").replace("Bearer ", "");
             User user = new UserRepository(unitOfWork).findUserByToken(token);
             if (user == null || !user.getUsername().equals("admin")) {
@@ -30,8 +29,23 @@ public class PackageController extends Controller {
             }
 
             List<Card> cards = this.getObjectMapper().readValue(request.getBody(), this.getObjectMapper().getTypeFactory().constructCollectionType(List.class, Card.class));
+            if (cards.size() != 5) {
+                return new Response(
+                        HttpStatus.BAD_REQUEST,
+                        ContentType.JSON,
+                        "{ \"message\": \"A package must contain exactly 5 cards\" }"
+                );
+            }
+            
+            CardRepository cardRepository = new CardRepository(unitOfWork);
+            for (Card card : cards) {
+                cardRepository.save(card);
+            }
+            unitOfWork.commitTransaction();
+
             Package newPackage = new Package(cards);
-            packages.add(newPackage);
+            new PackageRepository(unitOfWork).save(newPackage);
+            unitOfWork.commitTransaction();
 
             return new Response(
                     HttpStatus.CREATED,
@@ -43,12 +57,27 @@ public class PackageController extends Controller {
             return new Response(
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     ContentType.JSON,
-                    "{ \"message\": \"Internal Server Error\" }"
+                    "{ \"message\" : \"Internal Server Error\" }"
             );
         }
     }
 
-    public List<Package> getPackages() {
-        return packages;
+    public Response getPackages(Request request) {
+        try (UnitOfWork unitOfWork = new UnitOfWork()) {
+            List<Package> packages = new PackageRepository(unitOfWork).findAll();
+            String jsonResponse = this.getObjectMapper().writeValueAsString(packages);
+            return new Response(
+                    HttpStatus.OK,
+                    ContentType.JSON,
+                    jsonResponse
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new Response(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    ContentType.JSON,
+                    "{ \"message\" : \"Internal Server Error\" }"
+            );
+        }
     }
 }

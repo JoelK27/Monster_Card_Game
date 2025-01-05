@@ -25,7 +25,7 @@ public class UserService implements Service {
         else if (request.getMethod() == Method.GET) {
             //return this.userController.getUsers();
             // Alternativ könntest du hier die Repository-Version verwenden:
-            return this.userController.getUsersPerRepository();
+            return this.userController.getUsers();
         }
         // Prüfen, ob POST-Anfrage für das Hinzufügen eines neuen Benutzers
         else if (request.getMethod() == Method.POST) {

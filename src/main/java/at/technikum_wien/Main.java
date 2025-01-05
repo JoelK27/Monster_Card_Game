@@ -22,6 +22,7 @@ import at.technikum_wien.app.utils.Consumer;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.UUID;
 
 public class Main {
     public static void main(String[] args) {
@@ -72,19 +73,19 @@ public class Main {
 
         // Add cards to players' decks
         player1.getDeck().setCards(new ArrayList<>(Arrays.asList(
-                new MonsterCard("Dragon", 50, "Fire", "Dragon"),
-                new SpellCard("Fireball", 30, "Fire", "Burn"),
-                new MonsterCard("Goblin", 10, "Earth", "Goblin"),
-                new SpellCard("Lightning", 40, "Electric", "Shock"),
-                new MonsterCard("Orc", 25, "Earth", "Orc")
+                new MonsterCard(UUID.randomUUID(),"Dragon", 50, "Fire", "Dragon"),
+                new SpellCard(UUID.randomUUID(),"Fireball", 30, "Fire", "Burn"),
+                new MonsterCard(UUID.randomUUID(),"Goblin", 10, "Earth", "Goblin"),
+                new SpellCard(UUID.randomUUID(),"Lightning", 40, "Electric", "Shock"),
+                new MonsterCard(UUID.randomUUID(),"Orc", 25, "Earth", "Orc")
         )));
 
         player2.getDeck().setCards(new ArrayList<>(Arrays.asList(
-                new MonsterCard("Dragon", 50, "Fire", "Dragon"),
-                new SpellCard("Fireball", 30, "Fire", "Burn"),
-                new MonsterCard("Goblin", 10, "Earth", "Goblin"),
-                new SpellCard("Lightning", 40, "Electric", "Shock"),
-                new MonsterCard("Orc", 25, "Earth", "Orc")
+                new MonsterCard(UUID.randomUUID(),"Dragon", 50, "Fire", "Dragon"),
+                new SpellCard(UUID.randomUUID(),"Fireball", 30, "Fire", "Burn"),
+                new MonsterCard(UUID.randomUUID(),"Goblin", 10, "Earth", "Goblin"),
+                new SpellCard(UUID.randomUUID(),"Lightning", 40, "Electric", "Shock"),
+                new MonsterCard(UUID.randomUUID(),"Orc", 25, "Earth", "Orc")
         )));
 
         // Start the battle

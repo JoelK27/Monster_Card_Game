@@ -21,6 +21,10 @@ public class PackageService implements Service {
         if (request.getMethod() == Method.POST) {
             return this.packageController.createPackage(request);
         }
+        // Prüfen, ob GET-Anfrage für das Abrufen aller Pakete
+        else if (request.getMethod() == Method.GET) {
+            return this.packageController.getPackages(request);
+        }
 
         // Wenn keine der Methoden zutrifft, wird BAD_REQUEST zurückgegeben
         return new Response(

@@ -1,33 +1,83 @@
 package at.technikum_wien.app.controller;
 
+import at.technikum_wien.app.business.TokenManager;
+import at.technikum_wien.app.dal.UnitOfWork;
+import at.technikum_wien.app.dal.repository.UserRepository;
 import at.technikum_wien.httpserver.http.ContentType;
 import at.technikum_wien.httpserver.http.HttpStatus;
 import at.technikum_wien.httpserver.server.Request;
 import at.technikum_wien.httpserver.server.Response;
 import at.technikum_wien.app.models.User;
-import at.technikum_wien.app.service.User.UserDummyDAL;  // Dummy-DAL für die In-Memory-Speicherung
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import java.util.List;
+import java.sql.SQLException;
 
 public class SessionController extends Controller {
-    private final UserDummyDAL userDAL;
+    private final UserRepository userRepository;
+    private final TokenManager tokenManager;
 
     public SessionController() {
-        // Dummy-Daten für Tests, stattdessen sollte das Repository-Pattern verwendet werden.
-        this.userDAL = UserDummyDAL.getInstance(); // Hole die Singleton-Instanz
+        this.userRepository = new UserRepository(new UnitOfWork());
+        this.tokenManager = TokenManager.getInstance();
+    }
+
+    // POST /sessions/register => Benutzer registrieren
+    public Response register(Request request) {
+        try (UnitOfWork unitOfWork = new UnitOfWork()) {
+            // Deserialisiere den Request-Body in ein User-Objekt
+            User registerRequest = this.getObjectMapper().readValue(request.getBody(), User.class);
+            String username = registerRequest.getUsername();
+            String password = registerRequest.getPassword();
+
+            // Überprüfe, ob der Benutzername bereits existiert
+            User existingUser = userRepository.findUserByUsername(username);
+            if (existingUser != null) {
+                return new Response(
+                        HttpStatus.CONFLICT, // 409 - Benutzername bereits vergeben
+                        ContentType.JSON,
+                        "{ \"message\": \"Username already exists\" }"
+                );
+            }
+
+            // Erstelle einen neuen Benutzer
+            User newUser = new User(username, password);
+            userRepository.save(newUser);
+            unitOfWork.commitTransaction();
+
+            return new Response(
+                    HttpStatus.CREATED, // 201 - Benutzer erfolgreich erstellt
+                    ContentType.JSON,
+                    "{ \"message\": \"User registered successfully\" }"
+            );
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            return new Response(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    ContentType.JSON,
+                    "{ \"message\" : \"Internal Server Error\" }"
+            );
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return new Response(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    ContentType.JSON,
+                    "{ \"message\" : \"Database Error\" }"
+            );
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     // POST /sessions/login => Benutzer einloggen
     public Response login(Request request) {
-        try {
+        try (UnitOfWork unitOfWork = new UnitOfWork()) {
             // Deserialisiere den Request-Body in ein User-Objekt
             User loginRequest = this.getObjectMapper().readValue(request.getBody(), User.class);
             String username = loginRequest.getUsername();
             String password = loginRequest.getPassword();
 
             // Überprüfe, ob der Benutzer existiert
-            User user = userDAL.getUserByUsername(username);
+            User user = userRepository.findUserByUsername(username);
             if (user == null) {
                 return new Response(
                         HttpStatus.NOT_FOUND, // 404 - Benutzer nicht gefunden
@@ -46,7 +96,9 @@ public class SessionController extends Controller {
             }
 
             // Wenn Anmeldedaten korrekt sind, generiere ein Token
-            String token = generateToken(user);
+            String token = tokenManager.generateToken(user);
+            tokenManager.storeToken(username, token); // Speichere den Token im TokenManager
+
             return new Response(
                     HttpStatus.OK,
                     ContentType.JSON,
@@ -59,45 +111,8 @@ public class SessionController extends Controller {
                     ContentType.JSON,
                     "{ \"message\" : \"Internal Server Error\" }"
             );
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-    }
-
-    // POST /sessions/register => Benutzer registrieren
-    public Response register(Request request) {
-        try {
-            User newUser = this.getObjectMapper().readValue(request.getBody(), User.class);
-
-            // Überprüfen, ob der Benutzer bereits existiert
-            List<User> existingUsers = this.userDAL.getUsers();
-            for (User existingUser : existingUsers) {
-                if (existingUser.getUsername().equals(newUser.getUsername())) {
-                    return new Response(
-                            HttpStatus.CONFLICT, // 409 - Konflikt
-                            ContentType.JSON,
-                            "{ \"message\": \"User already exists\" }"
-                    );
-                }
-            }
-
-            // Wenn der Benutzer nicht existiert, füge ihn hinzu
-            this.userDAL.addUser(newUser);
-            return new Response(
-                    HttpStatus.CREATED, // 201 - Benutzer erfolgreich erstellt
-                    ContentType.JSON,
-                    "{ \"message\": \"User registered successfully\" }"
-            );
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-            return new Response(
-                    HttpStatus.INTERNAL_SERVER_ERROR,
-                    ContentType.JSON,
-                    "{ \"message\" : \"Internal Server Error\" }"
-            );
-        }
-    }
-
-    // Hilfsmethode zum Generieren eines Tokens (einfache Implementierung)
-    private String generateToken(User user) {
-        return user.getUsername() + "-mtcgToken"; // Einfaches Token-Format
     }
 }
