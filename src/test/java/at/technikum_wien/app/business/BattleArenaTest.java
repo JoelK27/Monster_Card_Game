@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -193,6 +194,43 @@ class BattleArenaTest {
         assertTrue(battleLog.get(0).startsWith("Round 1:"));
     }
 
+    @Test
+    void testCriticalHitOccurs() {
+        BattleArena battleArena = new BattleArena(player1, player2);
+        // Mock the random to always return true for critical hit
+        battleArena.setRandom(new Random() {
+            @Override
+            public double nextDouble() {
+                return 0.1; // Always less than 0.2
+            }
+        });
+
+        Card attacker = new MonsterCard(UUID.randomUUID(), "Dragon", 50, "Fire", "Dragon");
+        Card defender = new MonsterCard(UUID.randomUUID(), "Goblin", 30, "Earth", "Goblin");
+        double damage = battleArena.calculateDamage(attacker, defender);
+
+        assertEquals(100, damage); // 50 * 2 (Critical Hit)
+        assertTrue(battleArena.getBattleLog().contains("Dragon erzielt einen Critical Hit!"));
+    }
+
+    @Test
+    void testCriticalHitDoesNotOccur() {
+        BattleArena battleArena = new BattleArena(player1, player2);
+        // Mock the random to always return false for critical hit
+        battleArena.setRandom(new Random() {
+            @Override
+            public double nextDouble() {
+                return 0.3; // Always greater than 0.2
+            }
+        });
+
+        Card attacker = new MonsterCard(UUID.randomUUID(), "Dragon", 50, "Fire", "Dragon");
+        Card defender = new MonsterCard(UUID.randomUUID(), "Goblin", 30, "Earth", "Goblin");
+        double damage = battleArena.calculateDamage(attacker, defender);
+
+        assertEquals(50, damage); // No Critical Hit
+        assertFalse(battleArena.getBattleLog().contains("Dragon erzielt einen Critical Hit!"));
+    }
 
     private List<Card> createDeck(int count, String type, int damage) {
         List<Card> cards = new ArrayList<>();

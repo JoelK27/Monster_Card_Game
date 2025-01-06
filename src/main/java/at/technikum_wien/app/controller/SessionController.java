@@ -21,98 +21,62 @@ public class SessionController extends Controller {
         this.tokenManager = TokenManager.getInstance();
     }
 
-    // POST /sessions/register => Benutzer registrieren
+    // POST /users => Registrierung
     public Response register(Request request) {
         try (UnitOfWork unitOfWork = new UnitOfWork()) {
-            // Deserialisiere den Request-Body in ein User-Objekt
-            User registerRequest = this.getObjectMapper().readValue(request.getBody(), User.class);
-            String username = registerRequest.getUsername();
-            String password = registerRequest.getPassword();
-
-            // Überprüfe, ob der Benutzername bereits existiert
-            User existingUser = userRepository.findUserByUsername(username);
-            if (existingUser != null) {
+            User newUser = this.getObjectMapper().readValue(request.getBody(), User.class);
+            String token = newUser.getUsername() + "-mtcgToken";
+            newUser.setToken(token);
+            if (userRepository.findUserByUsername(newUser.getUsername()) != null) {
                 return new Response(
-                        HttpStatus.CONFLICT, // 409 - Benutzername bereits vergeben
-                        ContentType.JSON,
-                        "{ \"message\": \"Username already exists\" }"
+                    HttpStatus.CONFLICT,
+                    ContentType.JSON,
+                    "{ \"message\": \"User already exists\" }"
                 );
             }
 
-            // Erstelle einen neuen Benutzer
-            User newUser = new User(username, password);
             userRepository.save(newUser);
             unitOfWork.commitTransaction();
-
             return new Response(
-                    HttpStatus.CREATED, // 201 - Benutzer erfolgreich erstellt
-                    ContentType.JSON,
-                    "{ \"message\": \"User registered successfully\" }"
-            );
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-            return new Response(
-                    HttpStatus.INTERNAL_SERVER_ERROR,
-                    ContentType.JSON,
-                    "{ \"message\" : \"Internal Server Error\" }"
-            );
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return new Response(
-                    HttpStatus.INTERNAL_SERVER_ERROR,
-                    ContentType.JSON,
-                    "{ \"message\" : \"Database Error\" }"
+                HttpStatus.CREATED,
+                ContentType.JSON,
+                "{ \"message\": \"User added successfully\" }"
             );
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            return new Response(
+                HttpStatus.BAD_REQUEST,
+                ContentType.JSON,
+                "{ \"message\": \"Invalid request body\" }"
+            );
         }
     }
 
-    // POST /sessions/login => Benutzer einloggen
+    // POST /sessions => Login
     public Response login(Request request) {
-        try (UnitOfWork unitOfWork = new UnitOfWork()) {
-            // Deserialisiere den Request-Body in ein User-Objekt
-            User loginRequest = this.getObjectMapper().readValue(request.getBody(), User.class);
-            String username = loginRequest.getUsername();
-            String password = loginRequest.getPassword();
-
-            // Überprüfe, ob der Benutzer existiert
-            User user = userRepository.findUserByUsername(username);
-            if (user == null) {
+        try {
+            User loginUser = this.getObjectMapper().readValue(request.getBody(), User.class);
+            User existingUser = userRepository.findUserByUsername(loginUser.getUsername());
+            if (existingUser == null || !existingUser.getPassword().equals(loginUser.getPassword())) {
                 return new Response(
-                        HttpStatus.NOT_FOUND, // 404 - Benutzer nicht gefunden
-                        ContentType.JSON,
-                        "{ \"message\": \"User not found\" }"
+                    HttpStatus.UNAUTHORIZED,
+                    ContentType.JSON,
+                    "{ \"message\": \"Login failed\" }"
                 );
             }
-
-            // Überprüfe das Passwort
-            if (!user.getPassword().equals(password)) {
-                return new Response(
-                        HttpStatus.UNAUTHORIZED, // 401 - Ungültige Anmeldedaten
-                        ContentType.JSON,
-                        "{ \"message\": \"Invalid username or password! Login failed\" }"
-                );
-            }
-
-            // Wenn Anmeldedaten korrekt sind, generiere ein Token
-            String token = tokenManager.generateToken(user);
-            tokenManager.storeToken(username, token); // Speichere den Token im TokenManager
-
+            String token = existingUser.getUsername() + "-mtcgToken";
+            existingUser.setToken(token);
+            userRepository.update(existingUser);
             return new Response(
-                    HttpStatus.OK,
-                    ContentType.JSON,
-                    "{ \"token\": \"" + token + "\" }" // Gebe das Token zurück
-            );
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-            return new Response(
-                    HttpStatus.INTERNAL_SERVER_ERROR,
-                    ContentType.JSON,
-                    "{ \"message\" : \"Internal Server Error\" }"
+                HttpStatus.OK,
+                ContentType.JSON,
+                "{ \"token\": \"" + token + "\" }"
             );
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            return new Response(
+                HttpStatus.BAD_REQUEST,
+                ContentType.JSON,
+                "{ \"message\": \"Invalid request body\" }"
+            );
         }
     }
 }

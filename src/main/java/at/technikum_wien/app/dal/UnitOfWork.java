@@ -1,12 +1,16 @@
 package at.technikum_wien.app.dal;
 
+import lombok.Getter;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 public class UnitOfWork implements AutoCloseable {
 
+    @Getter
     private Connection connection;
+
     public UnitOfWork() {
         this.connection = DatabaseManager.INSTANCE.getConnection();
         try {

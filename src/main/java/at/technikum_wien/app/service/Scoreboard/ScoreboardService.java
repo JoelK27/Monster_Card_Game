@@ -7,24 +7,19 @@ import at.technikum_wien.httpserver.server.Request;
 import at.technikum_wien.httpserver.server.Response;
 import at.technikum_wien.httpserver.server.Service;
 import at.technikum_wien.app.controller.ScoreboardController;
-import at.technikum_wien.app.controller.UserController;
 
 public class ScoreboardService implements Service {
     private final ScoreboardController scoreboardController;
-    private final UserController userController;
 
     public ScoreboardService() {
         this.scoreboardController = new ScoreboardController();
-        this.userController = new UserController(); // Initialisiere den UserController
     }
 
     @Override
     public Response handleRequest(Request request) {
-        // Prüfen, ob allgemeine GET-Anfrage für alle Benutzer
+        // Prüfen, ob es sich um eine GET-Anfrage handelt
         if (request.getMethod() == Method.GET) {
             return this.scoreboardController.displayScoreboard(request);
-            // Alternativ könntest du hier die Repository-Version verwenden:
-            //return this.userController.getUsersPerRepository();
         }
 
         // Wenn keine der Methoden zutrifft, wird BAD_REQUEST zurückgegeben

@@ -16,7 +16,7 @@ import java.util.List;
 
 public class PackageController extends Controller {
 
-     public Response createPackage(Request request) {
+    public Response createPackage(Request request) {
         try (UnitOfWork unitOfWork = new UnitOfWork()) {
             String token = request.getHeaders().getHeader("Authorization").replace("Bearer ", "");
             User user = new UserRepository(unitOfWork).findUserByToken(token);
@@ -36,7 +36,7 @@ public class PackageController extends Controller {
                         "{ \"message\": \"A package must contain exactly 5 cards\" }"
                 );
             }
-            
+
             CardRepository cardRepository = new CardRepository(unitOfWork);
             for (Card card : cards) {
                 cardRepository.save(card);

@@ -17,11 +17,9 @@ public class StatsService implements Service {
 
     @Override
     public Response handleRequest(Request request) {
-        // Prüfen, ob allgemeine GET-Anfrage für alle Benutzer
+        // Prüfen, ob es sich um eine GET-Anfrage handelt
         if (request.getMethod() == Method.GET) {
             return this.statsController.showStats(request);
-            // Alternativ könntest du hier die Repository-Version verwenden:
-            // return this.userController.getUsersPerRepository();
         }
 
         // Wenn keine der Methoden zutrifft, wird BAD_REQUEST zurückgegeben

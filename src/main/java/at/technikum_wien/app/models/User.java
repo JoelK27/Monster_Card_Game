@@ -23,6 +23,15 @@ public class User {
     private String password;
     @Getter
     @Setter
+    private String Name;
+    @Getter
+    @Setter
+    private String Bio;
+    @Getter
+    @Setter
+    private String Image;
+    @Getter
+    @Setter
     private int coins;
     private List<Card> stack;
     @Getter
@@ -35,6 +44,9 @@ public class User {
     private String token;
     @Getter
     private List<TradingDeal> tradingDeals = new ArrayList<>();
+    @Getter
+    private List<Package> packages;
+
 
     @JsonCreator
     public User(@JsonProperty("Username") String username, @JsonProperty("Password") String password) {
@@ -46,7 +58,8 @@ public class User {
         this.stack = new ArrayList<>();
         this.deck = new Deck();
         this.score = 100; // Starting Score
-        this.token = null;
+        this.token  = username + "-mtcgToken";
+        this.packages = new ArrayList<>();
     }
 
     public void acquirePackage(Package cardPackage) {
@@ -56,6 +69,10 @@ public class User {
         } else {
             System.out.println("Not enough coins.");
         }
+    }
+
+    public void addPackage(Package pkg) {
+        this.packages.add(pkg);
     }
 
     public void selectBestCards() {

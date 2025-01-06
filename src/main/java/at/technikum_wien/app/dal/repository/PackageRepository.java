@@ -42,6 +42,26 @@ public class PackageRepository {
         }
     }
 
+    public Package findById(UUID id) throws SQLException {
+        String sql = "SELECT * FROM packages WHERE id = ?";
+        try (PreparedStatement stmt = unitOfWork.prepareStatement(sql)) {
+            stmt.setString(1, id.toString());
+            ResultSet resultSet = stmt.executeQuery();
+            if (resultSet.next()) {
+                return mapResultSetToPackage(resultSet);
+            }
+            return null;
+        }
+    }
+
+    public void delete(UUID id) throws SQLException {
+        String sql = "DELETE FROM packages WHERE id = ?";
+        try (PreparedStatement stmt = unitOfWork.prepareStatement(sql)) {
+            stmt.setString(1, id.toString());
+            stmt.executeUpdate();
+        }
+    }
+
     private Package mapResultSetToPackage(ResultSet resultSet) throws SQLException {
         List<Card> cards = new ArrayList<>();
         cards.add(new CardRepository(unitOfWork).findById(UUID.fromString(resultSet.getString("card1"))));

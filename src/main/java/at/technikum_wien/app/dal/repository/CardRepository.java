@@ -34,6 +34,20 @@ public class CardRepository {
         }
     }
 
+    // Find all cards by User ID
+    public List<Card> findCardsByUserId(int userId) throws SQLException {
+        String sql = "SELECT c.* FROM cards c JOIN user_cards uc ON c.id = uc.card_id WHERE uc.user_id = ?";
+        try (PreparedStatement stmt = unitOfWork.prepareStatement(sql)) {
+            stmt.setInt(1, userId);
+            ResultSet resultSet = stmt.executeQuery();
+            List<Card> cards = new ArrayList<>();
+            while (resultSet.next()) {
+                cards.add(mapResultSetToCard(resultSet));
+            }
+            return cards;
+        }
+    }
+
     // Find a card by ID
     public Card findById(UUID id) throws SQLException {
         String sql = "SELECT * FROM cards WHERE id = ?::uuid";

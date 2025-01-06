@@ -17,18 +17,14 @@ public class CardService implements Service {
 
     @Override
     public Response handleRequest(Request request) {
-        // Prüfen, ob allgemeine GET-Anfrage für alle Benutzer
         if (request.getMethod() == Method.GET) {
             return this.cardController.getCards(request);
-            // Alternativ könntest du hier die Repository-Version verwenden:
-            // return this.userController.getUsersPerRepository();
         }
 
-        // Wenn keine der Methoden zutrifft, wird BAD_REQUEST zurückgegeben
         return new Response(
                 HttpStatus.BAD_REQUEST,
                 ContentType.JSON,
-                "{ \"message\": \"Bad Request\" }"
+                "{ \"message\" : \"Bad Request\" }"
         );
     }
 }

@@ -56,7 +56,7 @@ public class Main {
         router.addService("/users", new UserService());
         router.addService("/sessions", new SessionService());
         router.addService("/packages", new PackageService());
-        router.addService("/transactions", new TransactionsService());
+        router.addService("/transactions/packages", new TransactionsService()); // Neue Zeile hinzufügen
         router.addService("/cards", new CardService());
         router.addService("/deck", new DeckService());
         router.addService("/stats", new StatsService());

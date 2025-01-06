@@ -5,10 +5,12 @@ import at.technikum_wien.app.models.MonsterCard;
 import at.technikum_wien.app.models.SpellCard;
 import at.technikum_wien.app.models.User;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 public class BattleArena {
     @Getter
@@ -18,6 +20,9 @@ public class BattleArena {
     @Getter
     private User winner;
     private List<String> battleLog = new ArrayList<>();
+    private static final double CRITICAL_HIT_CHANCE = 0.2; // 20% Chance
+    @Setter
+    private Random random = new Random();
 
     public BattleArena(User player1, User player2) {
         this.player1 = player1;
@@ -117,6 +122,7 @@ public class BattleArena {
 
     double calculateDamage(Card attacker, Card defender) {
         double damage = attacker.getDamage();
+        boolean criticalHit = isCriticalHit();
         if (attacker instanceof SpellCard || defender instanceof SpellCard) {
             if (attacker.getElementType().equals("Water") && defender.getElementType().equals("Fire")) {
                 damage *= 2;
@@ -132,6 +138,12 @@ public class BattleArena {
                 damage /= 2;
             }
         }
+
+        if (criticalHit) {
+            damage *= 2;
+            battleLog.add(attacker.getName() + " erzielt einen Critical Hit!");
+        }
+        
         return damage;
     }
 
@@ -148,5 +160,9 @@ public class BattleArena {
 
     public List<String> getBattleLog() {
         return battleLog;
+    }
+
+    private boolean isCriticalHit() {
+        return random.nextDouble() < CRITICAL_HIT_CHANCE;
     }
 }
