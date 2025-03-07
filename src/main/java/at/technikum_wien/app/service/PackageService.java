@@ -1,4 +1,4 @@
-package at.technikum_wien.app.service.Package;
+package at.technikum_wien.app.service;
 
 import at.technikum_wien.httpserver.http.ContentType;
 import at.technikum_wien.httpserver.http.HttpStatus;
@@ -17,16 +17,10 @@ public class PackageService implements Service {
 
     @Override
     public Response handleRequest(Request request) {
-        // Prüfen, ob POST-Anfrage für das Erstellen eines neuen Pakets
         if (request.getMethod() == Method.POST) {
             return this.packageController.createPackage(request);
         }
-        // Prüfen, ob GET-Anfrage für das Abrufen aller Pakete
-        else if (request.getMethod() == Method.GET) {
-            return this.packageController.getPackages(request);
-        }
 
-        // Wenn keine der Methoden zutrifft, wird BAD_REQUEST zurückgegeben
         return new Response(
                 HttpStatus.BAD_REQUEST,
                 ContentType.JSON,

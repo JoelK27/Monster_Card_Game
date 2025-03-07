@@ -11,7 +11,6 @@ import at.technikum_wien.httpserver.server.Response;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.List;
-import java.util.UUID;
 
 public class BattleController extends Controller {
 
@@ -43,10 +42,20 @@ public class BattleController extends Controller {
                 );
             }
 
+            Überprüfen, ob der Benutzer "admin" ist
+            if (player1.getUsername().equalsIgnoreCase("admin")) {
+                return new Response(
+                        HttpStatus.FORBIDDEN,
+                        ContentType.JSON,
+                        "{ \"message\" : \"Admin cannot participate in battles.\" }"
+                );
+            }
+            
+
             // Gegner auswählen (z.B. zufälligen Benutzer finden)
             List<User> allUsers = (List<User>) userRepository.findAllUsers();
             User player2 = allUsers.stream()
-                    .filter(user -> !user.getUsername().equals(player1.getUsername()))
+                    .filter(user -> !user.getUsername().equals(player1.getUsername()) && !user.getUsername().equalsIgnoreCase("admin"))
                     .findAny()
                     .orElse(null);
 
@@ -61,19 +70,24 @@ public class BattleController extends Controller {
             // BattleArena starten
             BattleArena battleArena = new BattleArena(player1, player2);
             User winner = battleArena.startBattle();
-            List<String> battleLog = battleArena.getBattleLog();
+
+            // Display battle log
+            System.out.println("Battle Log:");
+            for (String logEntry : battleArena.getBattleLog()) {
+                System.out.println(logEntry);
+            }
+
+            // Display winner
+            if (winner != null) {
+                System.out.println("The winner is: " + winner.getUsername());
+            }
 
             // Aktualisiere die Benutzerstatistiken in der Datenbank
             userRepository.update(player1);
             userRepository.update(player2);
 
             // Ergebnis zusammenstellen
-            BattleResult result = new BattleResult(
-                    winner != null ? winner.getUsername() : "Draw",
-                    battleLog
-            );
-
-            String jsonResponse = objectMapper.writeValueAsString(result);
+            String jsonResponse = objectMapper.writeValueAsString("");
 
             return new Response(
                     HttpStatus.OK,
@@ -87,17 +101,6 @@ public class BattleController extends Controller {
                     ContentType.JSON,
                     "{ \"message\" : \"Internal Server Error\" }"
             );
-        }
-    }
-
-    // Hilfsklasse zur Darstellung der Battle-Ergebnisse
-    private static class BattleResult {
-        public String winner;
-        public List<String> battleLog;
-
-        public BattleResult(String winner, List<String> battleLog) {
-            this.winner = winner;
-            this.battleLog = battleLog;
         }
     }
 }

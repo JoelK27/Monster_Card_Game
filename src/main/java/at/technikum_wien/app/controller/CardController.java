@@ -16,16 +16,13 @@ import java.util.List;
 public class CardController extends Controller {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public CardController () {
-    }
-
     public Response getCards(Request request) {
         String authHeader = request.getHeaderMap().getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return new Response(
                     HttpStatus.UNAUTHORIZED,
                     ContentType.JSON,
-                    "{ \"message\" : \"Unauthorized\" }"
+                    "{ \"message\": \"Unauthorized\" }"
             );
         }
 
@@ -37,7 +34,7 @@ public class CardController extends Controller {
                 return new Response(
                         HttpStatus.UNAUTHORIZED,
                         ContentType.JSON,
-                        "{ \"message\" : \"Invalid token\" }"
+                        "{ \"message\": \"Invalid token\" }"
                 );
             }
 
@@ -56,7 +53,7 @@ public class CardController extends Controller {
             return new Response(
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     ContentType.JSON,
-                    "{ \"message\" : \"Internal Server Error\" }"
+                    "{ \"message\": \"Internal Server Error\" }"
             );
         }
     }

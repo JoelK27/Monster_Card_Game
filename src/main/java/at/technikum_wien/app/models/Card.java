@@ -19,4 +19,6 @@ public abstract class Card {
         this.damage = damage;
         this.elementType = elementType;
     }
+
+    public abstract String getType();
 }

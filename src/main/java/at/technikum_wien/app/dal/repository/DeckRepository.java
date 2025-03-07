@@ -4,6 +4,7 @@ import at.technikum_wien.app.dal.UnitOfWork;
 import at.technikum_wien.app.models.Card;
 import at.technikum_wien.app.models.MonsterCard;
 import at.technikum_wien.app.models.SpellCard;
+import at.technikum_wien.app.models.User;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -19,7 +20,6 @@ public class DeckRepository {
         this.unitOfWork = unitOfWork;
     }
 
-    // Find deck by User ID
     public List<Card> findDeckByUserId(int userId) throws SQLException {
         String sql = "SELECT c.* FROM cards c JOIN user_deck ud ON c.id = ud.card_id WHERE ud.user_id = ?";
         try (PreparedStatement stmt = unitOfWork.prepareStatement(sql)) {
@@ -33,61 +33,20 @@ public class DeckRepository {
         }
     }
 
-    // Set or update deck for a user
-    public boolean setDeckForUser(int userId, List<UUID> cardIds) throws SQLException {
-        // Überprüfen Sie, ob alle Karten existieren und dem Benutzer gehören
-        String validationSql = "SELECT uc.card_id FROM user_cards uc WHERE uc.user_id = ? AND uc.card_id = ANY (?)";
-        try (PreparedStatement validationStmt = unitOfWork.prepareStatement(validationSql)) {
-            validationStmt.setInt(1, userId);
-            validationStmt.setArray(2, unitOfWork.getConnection().createArrayOf("uuid", cardIds.toArray()));
-            ResultSet rs = validationStmt.executeQuery();
-
-            List<UUID> validCardIds = new ArrayList<>();
-            while (rs.next()) {
-                validCardIds.add((UUID) rs.getObject("card_id"));
+    public boolean setDeckForUser(User user) throws SQLException {
+        String insertSql = "INSERT INTO user_deck (user_id, card_id) VALUES (?, ?)";
+        try (PreparedStatement insertStmt = unitOfWork.prepareStatement(insertSql)) {
+            for (Card card : user.getDeck().getCards()) {
+                insertStmt.setInt(1, user.getID());
+                insertStmt.setObject(2, card.getId());
+                insertStmt.executeUpdate();
             }
-
-            if (validCardIds.size() != cardIds.size()) {
-                // Mindestens eine Karte ist ungültig oder gehört nicht zum Benutzer
-                return false;
-            }
-        }
-
-        // Beginnen Sie eine Transaktion
-        unitOfWork.getConnection().setAutoCommit(false);
-        try {
-            // Löschen Sie das bestehende Deck
-            String deleteSql = "DELETE FROM user_deck WHERE user_id = ?";
-            try (PreparedStatement deleteStmt = unitOfWork.prepareStatement(deleteSql)) {
-                deleteStmt.setInt(1, userId);
-                deleteStmt.executeUpdate();
-            }
-
-            // Fügen Sie die neuen Karten hinzu
-            String insertSql = "INSERT INTO user_deck (user_id, card_id) VALUES (?, ?)";
-            try (PreparedStatement insertStmt = unitOfWork.prepareStatement(insertSql)) {
-                for (UUID cardId : cardIds) {
-                    insertStmt.setInt(1, userId);
-                    insertStmt.setObject(2, cardId);
-                    insertStmt.addBatch();
-                }
-                insertStmt.executeBatch();
-            }
-
-            // Commit der Transaktion
-            unitOfWork.getConnection().commit();
             return true;
         } catch (SQLException e) {
-            // Rollback bei Fehlern
-            unitOfWork.getConnection().rollback();
-            e.printStackTrace();
-            return false;
-        } finally {
-            unitOfWork.getConnection().setAutoCommit(true);
+            throw e;
         }
     }
 
-    // Helper method to map a ResultSet to a Card object
     private Card mapResultSetToCard(ResultSet resultSet) throws SQLException {
         UUID id = UUID.fromString(resultSet.getString("id"));
         String name = resultSet.getString("name");

@@ -1,13 +1,17 @@
 package at.technikum_wien.app.controller;
 
 import at.technikum_wien.app.dal.UnitOfWork;
+import at.technikum_wien.app.dal.repository.DeckRepository;
 import at.technikum_wien.app.dal.repository.UserRepository;
+import at.technikum_wien.app.models.Card;
 import at.technikum_wien.app.models.User;
 import at.technikum_wien.httpserver.http.ContentType;
 import at.technikum_wien.httpserver.http.HttpStatus;
 import at.technikum_wien.httpserver.server.Request;
 import at.technikum_wien.httpserver.server.Response;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.util.List;
 
 public class StatsController extends Controller {
 
@@ -39,12 +43,17 @@ public class StatsController extends Controller {
                 );
             }
 
-            // Erstelle ein JSON-Objekt mit den gewünschten Statistiken
+             // Hier holst du dir die Deck-Karten direkt aus der DB
+            DeckRepository deckRepository = new DeckRepository(unitOfWork);
+            List<Card> userDeck = deckRepository.findDeckByUserId(user.getID());
+            int deckSize = userDeck.size();
+
+            // JSON mit den gewünschten Statistiken erstellen
             String jsonResponse = objectMapper.writeValueAsString(new UserStats(
                     user.getUsername(),
                     user.getScore(),
                     user.getCoins(),
-                    user.getDeck().getCards().size()
+                    deckSize
             ));
 
             return new Response(

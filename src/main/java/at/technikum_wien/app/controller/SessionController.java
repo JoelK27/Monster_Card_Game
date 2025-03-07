@@ -1,6 +1,5 @@
 package at.technikum_wien.app.controller;
 
-import at.technikum_wien.app.business.TokenManager;
 import at.technikum_wien.app.dal.UnitOfWork;
 import at.technikum_wien.app.dal.repository.UserRepository;
 import at.technikum_wien.httpserver.http.ContentType;
@@ -8,17 +7,12 @@ import at.technikum_wien.httpserver.http.HttpStatus;
 import at.technikum_wien.httpserver.server.Request;
 import at.technikum_wien.httpserver.server.Response;
 import at.technikum_wien.app.models.User;
-import com.fasterxml.jackson.core.JsonProcessingException;
-
-import java.sql.SQLException;
 
 public class SessionController extends Controller {
     private final UserRepository userRepository;
-    private final TokenManager tokenManager;
 
     public SessionController() {
         this.userRepository = new UserRepository(new UnitOfWork());
-        this.tokenManager = TokenManager.getInstance();
     }
 
     // POST /users => Registrierung

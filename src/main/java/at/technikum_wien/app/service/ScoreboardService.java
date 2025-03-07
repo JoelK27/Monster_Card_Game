@@ -1,4 +1,4 @@
-package at.technikum_wien.app.service.Transactions;
+package at.technikum_wien.app.service;
 
 import at.technikum_wien.httpserver.http.ContentType;
 import at.technikum_wien.httpserver.http.HttpStatus;
@@ -6,20 +6,20 @@ import at.technikum_wien.httpserver.http.Method;
 import at.technikum_wien.httpserver.server.Request;
 import at.technikum_wien.httpserver.server.Response;
 import at.technikum_wien.httpserver.server.Service;
-import at.technikum_wien.app.controller.TransactionsController;
+import at.technikum_wien.app.controller.ScoreboardController;
 
-public class TransactionsService implements Service {
-    private final TransactionsController transactionsController;
+public class ScoreboardService implements Service {
+    private final ScoreboardController scoreboardController;
 
-    public TransactionsService() {
-        this.transactionsController = new TransactionsController();
+    public ScoreboardService() {
+        this.scoreboardController = new ScoreboardController();
     }
 
     @Override
     public Response handleRequest(Request request) {
-        // Prüfen, ob POST-Anfrage für das Erwerben eines Pakets
-        if (request.getMethod() == Method.POST && "/transactions/packages".equals(request.getPathname())) {
-            return this.transactionsController.acquirePackage(request);
+        // Prüfen, ob es sich um eine GET-Anfrage handelt
+        if (request.getMethod() == Method.GET) {
+            return this.scoreboardController.displayScoreboard(request);
         }
 
         // Wenn keine der Methoden zutrifft, wird BAD_REQUEST zurückgegeben

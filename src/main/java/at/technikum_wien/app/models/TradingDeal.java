@@ -1,32 +1,36 @@
 package at.technikum_wien.app.models;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
+import lombok.Setter;
+
+import java.util.UUID;
 
 public class TradingDeal {
     @Getter
-    private String id;
-    // Getters
+    private UUID id;
     @Getter
-    private Card offeredCard;
-    private boolean requiresSpell;
+    private UUID cardToTrade;
     @Getter
-    private ElementType elementTypeRequirement;
+    private String type;
     @Getter
     private int minimumDamage;
     @Getter
-    private String partnerToken;
+    @Setter
+    private int ownerId;
 
-    public TradingDeal(String id, Card offeredCard, boolean requiresSpell, ElementType elementTypeRequirement, int minimumDamage, String partnerToken) {
+    @JsonCreator
+    public TradingDeal(
+            @JsonProperty("Id") UUID id,
+            @JsonProperty("CardToTrade") UUID cardToTrade,
+            @JsonProperty("Type") String type,
+            @JsonProperty("MinimumDamage") int minimumDamage,
+            @JsonProperty("OwnerId") int ownerId) {
         this.id = id;
-        this.offeredCard = offeredCard;
-        this.requiresSpell = requiresSpell;
-        this.elementTypeRequirement = elementTypeRequirement;
+        this.cardToTrade = cardToTrade;
+        this.type = type;
         this.minimumDamage = minimumDamage;
-        this.partnerToken = partnerToken;
-    }
-
-    public boolean requiresSpell() {
-        return requiresSpell;
+        this.ownerId = ownerId;
     }
 }
-

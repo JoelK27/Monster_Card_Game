@@ -13,5 +13,9 @@ public class MonsterCard extends Card {
         this.monsterType = monsterType;
     }
 
+    @Override
+    public String getType() {
+        return "Monster";
+    }
 }
 

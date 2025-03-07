@@ -1,9 +1,8 @@
 package at.technikum_wien.app.business;
 
-import at.technikum_wien.app.models.Card;
-import at.technikum_wien.app.models.MonsterCard;
-import at.technikum_wien.app.models.SpellCard;
-import at.technikum_wien.app.models.User;
+import at.technikum_wien.app.dal.UnitOfWork;
+import at.technikum_wien.app.dal.repository.CardRepository;
+import at.technikum_wien.app.models.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,6 +18,7 @@ public class BattleArena {
     private User player2;
     @Getter
     private User winner;
+    @Getter
     private List<String> battleLog = new ArrayList<>();
     private static final double CRITICAL_HIT_CHANCE = 0.2; // 20% Chance
     @Setter
@@ -27,9 +27,25 @@ public class BattleArena {
     public BattleArena(User player1, User player2) {
         this.player1 = player1;
         this.player2 = player2;
+
+        // Decks aus der Datenbank laden
+        try (UnitOfWork unitOfWork = new UnitOfWork()) {
+            CardRepository cardRepository = new CardRepository(unitOfWork);
+
+            // Decks für beide Spieler laden
+            player1.getDeck().setCards(cardRepository.findCardsByUserId(player1.getID()));
+            player2.getDeck().setCards(cardRepository.findCardsByUserId(player2.getID()));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public User startBattle() {
+        if (player1.getDeck().getCards().isEmpty() || player2.getDeck().getCards().isEmpty()) {
+            battleLog.add("One or both players have no cards. No battle was executed.");
+            return null;
+        }
+
         int round = 0;
         while (round < 100 && !player1.getDeck().getCards().isEmpty() && !player2.getDeck().getCards().isEmpty()) {
             round++;
@@ -62,7 +78,6 @@ public class BattleArena {
 
         if (round >= 100) {
             battleLog.add("The battle reached the round limit and is a draw.");
-            return null;
         }
 
         if (player1.getDeck().getCards().isEmpty()) {
@@ -141,13 +156,14 @@ public class BattleArena {
 
         if (criticalHit) {
             damage *= 2;
-            battleLog.add(attacker.getName() + " erzielt einen Critical Hit!");
+            battleLog.add(attacker.getName() + " dealt a Critical Hit!");
         }
         
         return damage;
     }
 
     private void updatePlayerStats() {
+        // Nur wenn es wirklich einen Sieger gibt werden ELO-Punkte angepasst
         if (winner != null) {
             winner.updateScore(3);
             if (winner == player1) {
@@ -155,11 +171,10 @@ public class BattleArena {
             } else {
                 player1.updateScore(-5);
             }
+        } else {
+            // Bei Rundenlimit entscheiden wir uns für ELO-Draw
+            battleLog.add("No ELO change because the battle ended in a draw.");
         }
-    }
-
-    public List<String> getBattleLog() {
-        return battleLog;
     }
 
     private boolean isCriticalHit() {

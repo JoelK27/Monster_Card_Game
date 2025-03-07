@@ -16,19 +16,29 @@ import java.util.Collection;
 public class UserController extends Controller {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    public Response getUser(String username, Request request) {
+        String authHeader = request.getHeaderMap().getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return new Response(
+                    HttpStatus.UNAUTHORIZED,
+                    ContentType.JSON,
+                    "{ \"message\": \"Unauthorized\" }"
+            );
+        }
 
-    public Response getUser(String username) {
+        String token = authHeader.replace("Bearer ", "");
         try (UnitOfWork unitOfWork = new UnitOfWork()) {
-            UserRepository userRepository = new UserRepository(unitOfWork);  // Verwende diese Instanz
-            User userData = userRepository.findUserByUsername(username);
-            if (userData == null) {
+            UserRepository userRepository = new UserRepository(unitOfWork);
+            User requestingUser = userRepository.findUserByUsernameAndToken(username, token);
+            if (requestingUser == null) {
                 return new Response(
-                        HttpStatus.NOT_FOUND,
+                        HttpStatus.UNAUTHORIZED,
                         ContentType.JSON,
-                        "{ \"message\": \"User not found\" }"
+                        "{ \"message\": \"Invalid token\" }"
                 );
             }
-            String userDataJSON = this.getObjectMapper().writeValueAsString(userData);
+
+            String userDataJSON = this.getObjectMapper().writeValueAsString(requestingUser);
             return new Response(
                     HttpStatus.OK,
                     ContentType.JSON,
@@ -58,9 +68,28 @@ public class UserController extends Controller {
         }
     }
 
-    public Response getUsers() {
+    public Response getUsers(String username, Request request) {
+        String authHeader = request.getHeaderMap().getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return new Response(
+                    HttpStatus.UNAUTHORIZED,
+                    ContentType.JSON,
+                    "{ \"message\": \"Unauthorized\" }"
+            );
+        }
+
+        String token = authHeader.replace("Bearer ", "");
         try (UnitOfWork unitOfWork = new UnitOfWork()) {
             UserRepository userRepository = new UserRepository(unitOfWork);
+            User requestingUser = userRepository.findUserByUsernameAndToken(username, token);
+            if (requestingUser == null) {
+                return new Response(
+                        HttpStatus.UNAUTHORIZED,
+                        ContentType.JSON,
+                        "{ \"message\": \"Invalid token\" }"
+                );
+            }
+
             Collection<User> users = userRepository.findAllUsers();
             String usersJSON = this.getObjectMapper().writeValueAsString(users);
             return new Response(
@@ -95,7 +124,7 @@ public class UserController extends Controller {
     // POST /users => Registrierung
     public Response addUser(Request request) {
         try (UnitOfWork unitOfWork = new UnitOfWork()) {
-            UserRepository userRepository = new UserRepository(unitOfWork);  // Verwende diese Instanz
+            UserRepository userRepository = new UserRepository(unitOfWork);
             User user = this.getObjectMapper().readValue(request.getBody(), User.class);
             User existingUser = userRepository.findUserByUsername(user.getUsername());
             if (existingUser != null) {
@@ -145,8 +174,8 @@ public class UserController extends Controller {
         String token = authHeader.replace("Bearer ", "");
         try (UnitOfWork unitOfWork = new UnitOfWork()) {
             UserRepository userRepository = new UserRepository(unitOfWork);
-            User user = userRepository.findUserByUsernameAndToken(username, token);
-            if (user == null) {
+            User existingUser = userRepository.findUserByUsernameAndToken(username, token);
+            if (existingUser == null) {
                 return new Response(
                         HttpStatus.FORBIDDEN,
                         ContentType.JSON,
@@ -154,14 +183,21 @@ public class UserController extends Controller {
                 );
             }
 
-            // Parse der neuen Benutzerdaten aus dem Request-Body
-            User updatedUser = objectMapper.readValue(request.getBody(), User.class);
-            
-            updatedUser.setID(user.getID()); // Stellen Sie sicher, dass die ID beibehalten wird
-            updatedUser.setUsername(user.getUsername()); // Username darf nicht geändert werden
-            updatedUser.setToken(user.getToken()); // Token darf nicht geändert werden
+            // JSON einlesen
+            User partialUpdates = objectMapper.readValue(request.getBody(), User.class);
 
-            userRepository.update(updatedUser);
+            // Nur Felder überschreiben, die im JSON vorhanden sind
+            if (partialUpdates.getName() != null) {
+                existingUser.setName(partialUpdates.getName());
+            }
+            if (partialUpdates.getBio() != null) {
+                existingUser.setBio(partialUpdates.getBio());
+            }
+            if (partialUpdates.getImage() != null) {
+                existingUser.setImage(partialUpdates.getImage());
+            }
+
+            userRepository.update(existingUser);
             unitOfWork.commitTransaction();
 
             return new Response(
@@ -170,21 +206,18 @@ public class UserController extends Controller {
                     "{ \"message\": \"User updated successfully\" }"
             );
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
             return new Response(
                     HttpStatus.BAD_REQUEST,
                     ContentType.JSON,
                     "{ \"message\": \"Invalid request body\" }"
             );
         } catch (SQLException e) {
-            e.printStackTrace();
             return new Response(
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     ContentType.JSON,
                     "{ \"message\": \"Database Error\" }"
             );
         } catch (Exception e) {
-            e.printStackTrace();
             return new Response(
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     ContentType.JSON,
@@ -196,7 +229,7 @@ public class UserController extends Controller {
     // DELETE /user/:id
     public Response deleteUser(String id) {
         try (UnitOfWork unitOfWork = new UnitOfWork()) {
-            UserRepository userRepository = new UserRepository(unitOfWork);  // Verwende diese Instanz
+            UserRepository userRepository = new UserRepository(unitOfWork);
             User user = userRepository.findUserById(Integer.parseInt(id));
             if (user == null) {
                 return new Response(

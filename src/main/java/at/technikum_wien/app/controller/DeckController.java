@@ -63,12 +63,6 @@ public class DeckController extends Controller {
         }
     }
 
-    /**
-     * Methode zum Konfigurieren des Decks eines Benutzers.
-     *
-     * @param request Die HTTP-Anfrage mit dem JSON-Array der Karten-UUIDs.
-     * @return Die HTTP-Antwort mit dem entsprechenden Statuscode und Nachricht.
-     */
     public Response configureDeck(Request request) {
         String authHeader = request.getHeaderMap().getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -91,13 +85,11 @@ public class DeckController extends Controller {
                 );
             }
 
-            // Parse das JSON-Array der Karten-UUIDs
             List<String> cardIdStrings = objectMapper.readValue(
                     request.getBody(),
                     new TypeReference<List<String>>() {}
             );
 
-            // Validierung: Deck muss genau 4 Karten enthalten
             if (cardIdStrings.size() != 4) {
                 return new Response(
                         HttpStatus.BAD_REQUEST,
@@ -106,29 +98,46 @@ public class DeckController extends Controller {
                 );
             }
 
-            // Konvertiere die Strings zu UUIDs
             List<UUID> cardIds = cardIdStrings.stream()
                     .map(UUID::fromString)
                     .toList();
 
-            DeckRepository deckRepository = new DeckRepository(unitOfWork);
-            boolean success = deckRepository.setDeckForUser(user.getID(), cardIds);
+            user.loadUserCards();
+            List<Card> deckCards = user.getStack().stream()
+                    .filter(card -> cardIds.contains(card.getId()))
+                    .toList();
 
-            if (success) {
-                return new Response(
-                        HttpStatus.OK,
-                        ContentType.JSON,
-                        "{ \"message\" : \"Deck configured successfully.\" }"
-                );
-            } else {
+            if (deckCards.size() != 4) {
                 return new Response(
                         HttpStatus.BAD_REQUEST,
                         ContentType.JSON,
                         "{ \"message\" : \"One or more cards are invalid or do not belong to the user.\" }"
                 );
             }
+
+            user.getDeck().setCards(deckCards);
+
+            userRepository.updateUserCards(user); // Adds cards to user_cards
+
+            DeckRepository deckRepository = new DeckRepository(unitOfWork);
+            boolean success = deckRepository.setDeckForUser(user);
+
+            if (success) {
+                unitOfWork.commitTransaction();
+                return new Response(
+                        HttpStatus.OK,
+                        ContentType.JSON,
+                        "{ \"message\" : \"Deck configured successfully.\" }"
+                );
+            } else {
+                unitOfWork.rollbackTransaction();
+                return new Response(
+                        HttpStatus.BAD_REQUEST,
+                        ContentType.JSON,
+                        "{ \"message\" : \"Failed to configure deck.\" }"
+                );
+            }
         } catch (IllegalArgumentException e) {
-            // Ungültige UUID-Formatierung
             return new Response(
                     HttpStatus.BAD_REQUEST,
                     ContentType.JSON,

@@ -19,13 +19,14 @@ public class PackageRepository {
     }
 
     public void save(Package cardPackage) throws SQLException {
-        String sql = "INSERT INTO packages (card1, card2, card3, card4, card5) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO packages (id, card1, card2, card3, card4, card5) VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement stmt = unitOfWork.prepareStatement(sql)) {
-            stmt.setObject(1, cardPackage.getCards().get(0).getId());
-            stmt.setObject(2, cardPackage.getCards().get(1).getId());
-            stmt.setObject(3, cardPackage.getCards().get(2).getId());
-            stmt.setObject(4, cardPackage.getCards().get(3).getId());
-            stmt.setObject(5, cardPackage.getCards().get(4).getId());
+            stmt.setObject(1, cardPackage.getId(), java.sql.Types.OTHER);
+            stmt.setObject(2, cardPackage.getCards().get(0).getId(), java.sql.Types.OTHER);
+            stmt.setObject(3, cardPackage.getCards().get(1).getId(), java.sql.Types.OTHER);
+            stmt.setObject(4, cardPackage.getCards().get(2).getId(), java.sql.Types.OTHER);
+            stmt.setObject(5, cardPackage.getCards().get(3).getId(), java.sql.Types.OTHER);
+            stmt.setObject(6, cardPackage.getCards().get(4).getId(), java.sql.Types.OTHER);
             stmt.executeUpdate();
         }
     }
@@ -45,7 +46,7 @@ public class PackageRepository {
     public Package findById(UUID id) throws SQLException {
         String sql = "SELECT * FROM packages WHERE id = ?";
         try (PreparedStatement stmt = unitOfWork.prepareStatement(sql)) {
-            stmt.setString(1, id.toString());
+            stmt.setObject(1, id, java.sql.Types.OTHER);
             ResultSet resultSet = stmt.executeQuery();
             if (resultSet.next()) {
                 return mapResultSetToPackage(resultSet);
@@ -55,20 +56,31 @@ public class PackageRepository {
     }
 
     public void delete(UUID id) throws SQLException {
-        String sql = "DELETE FROM packages WHERE id = ?";
-        try (PreparedStatement stmt = unitOfWork.prepareStatement(sql)) {
-            stmt.setString(1, id.toString());
-            stmt.executeUpdate();
+        String deleteUserPackagesSql = "DELETE FROM user_packages WHERE package_id = ?";
+        try (PreparedStatement deleteUserPackagesStmt = unitOfWork.prepareStatement(deleteUserPackagesSql)) {
+            deleteUserPackagesStmt.setObject(1, id, java.sql.Types.OTHER);
+            deleteUserPackagesStmt.executeUpdate();
+        }
+
+        String deletePackageSql = "DELETE FROM packages WHERE id = ?";
+        try (PreparedStatement deletePackageStmt = unitOfWork.prepareStatement(deletePackageSql)) {
+            deletePackageStmt.setObject(1, id, java.sql.Types.OTHER);
+            deletePackageStmt.executeUpdate();
         }
     }
 
     private Package mapResultSetToPackage(ResultSet resultSet) throws SQLException {
+        UUID id = UUID.fromString(resultSet.getString("id"));
         List<Card> cards = new ArrayList<>();
         cards.add(new CardRepository(unitOfWork).findById(UUID.fromString(resultSet.getString("card1"))));
         cards.add(new CardRepository(unitOfWork).findById(UUID.fromString(resultSet.getString("card2"))));
         cards.add(new CardRepository(unitOfWork).findById(UUID.fromString(resultSet.getString("card3"))));
         cards.add(new CardRepository(unitOfWork).findById(UUID.fromString(resultSet.getString("card4"))));
         cards.add(new CardRepository(unitOfWork).findById(UUID.fromString(resultSet.getString("card5"))));
-        return new Package(cards);
+
+        Package cardPackage = new Package(cards);
+        cardPackage.setId(id); // Setze die ID des Pakets
+
+        return cardPackage;
     }
 }

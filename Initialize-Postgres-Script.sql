@@ -30,9 +30,31 @@ CREATE TABLE cards (
     deck BOOLEAN DEFAULT FALSE
 );
 
+-- Tabelle für Benutzerkarten
+CREATE TABLE user_cards (
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    card_id UUID REFERENCES cards(id) ON DELETE CASCADE,
+    PRIMARY KEY (user_id, card_id)
+);
+
+-- Tabelle für Benutzerdecks
+CREATE TABLE user_deck (
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    card_id UUID REFERENCES cards(id) ON DELETE CASCADE,
+    PRIMARY KEY (user_id, card_id)
+);
+
+CREATE TABLE user_packages (
+    user_id INT NOT NULL,
+    package_id UUID NOT NULL,
+    PRIMARY KEY (user_id, package_id),
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (package_id) REFERENCES packages(id)
+);
+
 -- Tabelle für Pakete
 CREATE TABLE packages (
-    id SERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY,
     card1 UUID REFERENCES cards(id),
     card2 UUID REFERENCES cards(id),
     card3 UUID REFERENCES cards(id),
@@ -42,7 +64,7 @@ CREATE TABLE packages (
 
 -- Verbindungstabelle für Karten und Pakete
 CREATE TABLE package_cards (
-    package_id INTEGER REFERENCES packages(id) ON DELETE CASCADE,
+    package_id UUID REFERENCES packages(id) ON DELETE CASCADE,
     card_id UUID REFERENCES cards(id) ON DELETE CASCADE,
     PRIMARY KEY (package_id, card_id)
 );
@@ -64,6 +86,12 @@ CREATE TABLE battles (
     winner_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
     battle_log TEXT
 );
+
+ALTER TABLE user_cards DROP CONSTRAINT user_cards_pkey;
+ALTER TABLE user_cards ADD COLUMN id SERIAL PRIMARY KEY;
+
+ALTER TABLE user_packages DROP CONSTRAINT user_packages_pkey;
+ALTER TABLE user_packages ADD COLUMN id SERIAL PRIMARY KEY;
 
 -- Verify the setup by selecting all data
 --SELECT * FROM users;

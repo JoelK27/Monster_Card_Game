@@ -1,4 +1,4 @@
-package at.technikum_wien.app.service.Card;
+package at.technikum_wien.app.service;
 
 import at.technikum_wien.httpserver.http.ContentType;
 import at.technikum_wien.httpserver.http.HttpStatus;

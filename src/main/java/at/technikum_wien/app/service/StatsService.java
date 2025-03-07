@@ -1,4 +1,4 @@
-package at.technikum_wien.app.service.Scoreboard;
+package at.technikum_wien.app.service;
 
 import at.technikum_wien.httpserver.http.ContentType;
 import at.technikum_wien.httpserver.http.HttpStatus;
@@ -6,20 +6,20 @@ import at.technikum_wien.httpserver.http.Method;
 import at.technikum_wien.httpserver.server.Request;
 import at.technikum_wien.httpserver.server.Response;
 import at.technikum_wien.httpserver.server.Service;
-import at.technikum_wien.app.controller.ScoreboardController;
+import at.technikum_wien.app.controller.StatsController;
 
-public class ScoreboardService implements Service {
-    private final ScoreboardController scoreboardController;
+public class StatsService implements Service {
+    private final StatsController statsController;
 
-    public ScoreboardService() {
-        this.scoreboardController = new ScoreboardController();
+    public StatsService() {
+        this.statsController = new StatsController();
     }
 
     @Override
     public Response handleRequest(Request request) {
         // Prüfen, ob es sich um eine GET-Anfrage handelt
         if (request.getMethod() == Method.GET) {
-            return this.scoreboardController.displayScoreboard(request);
+            return this.statsController.showStats(request);
         }
 
         // Wenn keine der Methoden zutrifft, wird BAD_REQUEST zurückgegeben

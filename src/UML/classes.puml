@@ -6,12 +6,32 @@ class Main {
 package Controllers {
     class UserController {
         +getUser(String id) : Response
+        +getUsers(String username, Request request) : Response
+        +addUser(Request request) : Response
+        +updateUser(String username, Request request) : Response
+        +deleteUser(String id) : Response
     }
     class BattleController {
-        +startBattle() : void
+        +handleBattle(Request request) : Response
     }
     class DeckController {
-        +getDeck(String userId) : Deck
+        +getDeck(Request request) : Response
+        +configureDeck(Request request) : Response
+    }
+    class PackageController {
+        +createPackage(Request request) : Response
+    }
+    class StatsController {
+        +showStats(Request request) : Response
+    }
+    class TransactionsController {
+        +acquirePackage(Request request) : Response
+    }
+    class TradingsController {
+        +getTradingDeals(Request request) : Response
+        +createTradingDeal(Request request) : Response
+        +deleteTradingDeal(Request request) : Response
+        +executeTradingDeal(Request request) : Response
     }
 }
 
@@ -28,36 +48,135 @@ package Models {
         +attack() : void
     }
 
+    class SpellCard extends Card {
+        +castSpell() : void
+    }
+
     class Deck {
         -cards: List<Card>
-        +addCard(Card card) : void
+        +addCard(Card) : void
+        +removeCard(Card) : void
+        +getBestCards() : List<Card>
     }
 
     class User {
         -username: String
         -password: String
         +getUserInfo() : String
+        +tradeCard(Card, User) : void
+        +updateScore(int points) : void
+        +getStack() : List<Card>
+        +loadUserCards() : void
+    }
+
+    class ScoreBoard {
+        -players: List<User>
+        +displayRankings() : void
+    }
+
+    class Package {
+        -id: UUID
+        -cards: List<Card>
+        +getId() : UUID
+        +getCards() : List<Card>
+    }
+
+    class TradingDeal {
+        -id: UUID
+        -ownerId: UUID
+        -cardToTrade: UUID
+        -type: String
+        -minimumDamage: int
+        +getOwnerId() : UUID
+        +getCardToTrade() : UUID
+        +getType() : String
+        +getMinimumDamage() : int
     }
 }
 
 package Services {
     class UserService {
-        +getUser(int id) : User
+        +handleRequest(Request request) : Response
     }
 
-    class BattleArena {
-        +startBattle(User player1, User player2) : void
+    class BattleService {
+        +handleRequest(Request request) : Response
+        +startBattleAsync(Request request) : Response
     }
 
     class SessionService {
-        +createSession(User user) : String
+        +handleRequest(Request request) : Response
+    }
+
+    class DeckService {
+        +handleRequest(Request request) : Response
+    }
+
+    class CardService {
+        +handleRequest(Request request) : Response
+    }
+
+    class StatsService {
+        +handleRequest(Request request) : Response
+    }
+
+    class ScoreboardService {
+        +handleRequest(Request request) : Response
+    }
+
+    class PackageService {
+        +handleRequest(Request request) : Response
+    }
+
+    class TransactionsService {
+        +handleRequest(Request request) : Response
+    }
+
+    class TradingsService {
+        +handleRequest(Request request) : Response
+    }
+}
+
+package Repositories {
+    class TradingDealRepository {
+        +findById(UUID) : TradingDeal
+        +delete(UUID) : void
+        +findAll() : List<TradingDeal>
+        +save(TradingDeal) : void
+    }
+
+    class CardRepository {
+        +findById(UUID) : Card
+        +removeCardFromUser(UUID userId, UUID cardId) : void
+        +addCardToUser(UUID userId, UUID cardId) : void
+        +findCardsByUserId(UUID userId) : List<Card>
+        +save(Card) : void
+    }
+
+    class UserRepository {
+        +findUserByToken(String) : User
+        +findUserById(UUID) : User
+        +update(User) : void
+        +findAllUsers() : List<User>
+        +findAllUsersSortedByScore() : List<User>
+        +findUserByUsernameAndToken(String username, String token) : User
+    }
+
+    class DeckRepository {
+        +findDeckByUserId(UUID userId) : List<Card>
+    }
+
+    class PackageRepository {
+        +findAll() : List<Package>
+        +delete(UUID packageId) : void
     }
 }
 
 Main --> Controllers
 Controllers --> Models
 Controllers --> Services
-Models --> Card
+Controllers --> Repositories
+Services --> Repositories
 Card <|-- MonsterCard
-
+Card <|-- SpellCard
 @enduml

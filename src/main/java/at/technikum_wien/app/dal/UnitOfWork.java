@@ -20,8 +20,7 @@ public class UnitOfWork implements AutoCloseable {
         }
     }
 
-    public void commitTransaction()
-    {
+    public void commitTransaction() {
         if (this.connection != null) {
             try {
                 this.connection.commit();
@@ -30,8 +29,8 @@ public class UnitOfWork implements AutoCloseable {
             }
         }
     }
-    public void rollbackTransaction()
-    {
+
+    public void rollbackTransaction() {
         if (this.connection != null) {
             try {
                 this.connection.rollback();
@@ -41,10 +40,10 @@ public class UnitOfWork implements AutoCloseable {
         }
     }
 
-    public void finishWork()
-    {
+    public void finishWork() {
         if (this.connection != null) {
             try {
+                this.connection.setAutoCommit(true); // Stelle sicher, dass autoCommit wieder aktiviert wird
                 this.connection.close();
                 this.connection = null;
             } catch (SQLException e) {
@@ -53,19 +52,10 @@ public class UnitOfWork implements AutoCloseable {
         }
     }
 
-    public PreparedStatement prepareStatement(String sql)
-    {
+    public PreparedStatement prepareStatement(String sql) {
         if (this.connection != null) {
             try {
                 return this.connection.prepareStatement(sql);
-                // WRONG
-                // SELECT * FROM users WHERE username = <user generated content>;
-
-                // CORRECT
-                // 1.) SELECT * FROM users WHERE username = ?;
-                // 2.) DATABASE PLEASE SET "user or 1=1" as ?
-                // 3.) DATABASE PLEASE EXECUTE PREPARED STMT
-                // 4.) DATABASE SENDS RESULT to APPLICATION
             } catch (SQLException e) {
                 throw new DataAccessException("Erstellen eines PreparedStatements nicht erfolgreich", e);
             }

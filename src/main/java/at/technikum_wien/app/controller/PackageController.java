@@ -11,10 +11,12 @@ import at.technikum_wien.httpserver.http.ContentType;
 import at.technikum_wien.httpserver.http.HttpStatus;
 import at.technikum_wien.httpserver.server.Request;
 import at.technikum_wien.httpserver.server.Response;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.List;
 
 public class PackageController extends Controller {
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public Response createPackage(Request request) {
         try (UnitOfWork unitOfWork = new UnitOfWork()) {
@@ -28,7 +30,7 @@ public class PackageController extends Controller {
                 );
             }
 
-            List<Card> cards = this.getObjectMapper().readValue(request.getBody(), this.getObjectMapper().getTypeFactory().constructCollectionType(List.class, Card.class));
+            List<Card> cards = objectMapper.readValue(request.getBody(), objectMapper.getTypeFactory().constructCollectionType(List.class, Card.class));
             if (cards.size() != 5) {
                 return new Response(
                         HttpStatus.BAD_REQUEST,
@@ -41,7 +43,6 @@ public class PackageController extends Controller {
             for (Card card : cards) {
                 cardRepository.save(card);
             }
-            unitOfWork.commitTransaction();
 
             Package newPackage = new Package(cards);
             new PackageRepository(unitOfWork).save(newPackage);
@@ -51,25 +52,6 @@ public class PackageController extends Controller {
                     HttpStatus.CREATED,
                     ContentType.JSON,
                     "{ \"message\": \"Package created successfully\" }"
-            );
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new Response(
-                    HttpStatus.INTERNAL_SERVER_ERROR,
-                    ContentType.JSON,
-                    "{ \"message\" : \"Internal Server Error\" }"
-            );
-        }
-    }
-
-    public Response getPackages(Request request) {
-        try (UnitOfWork unitOfWork = new UnitOfWork()) {
-            List<Package> packages = new PackageRepository(unitOfWork).findAll();
-            String jsonResponse = this.getObjectMapper().writeValueAsString(packages);
-            return new Response(
-                    HttpStatus.OK,
-                    ContentType.JSON,
-                    jsonResponse
             );
         } catch (Exception e) {
             e.printStackTrace();

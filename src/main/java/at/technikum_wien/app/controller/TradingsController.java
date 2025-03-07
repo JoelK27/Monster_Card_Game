@@ -1,33 +1,33 @@
 package at.technikum_wien.app.controller;
 
+import at.technikum_wien.app.dal.UnitOfWork;
+import at.technikum_wien.app.dal.repository.CardRepository;
+import at.technikum_wien.app.dal.repository.TradingDealRepository;
+import at.technikum_wien.app.dal.repository.UserRepository;
+import at.technikum_wien.app.models.Card;
+import at.technikum_wien.app.models.TradingDeal;
+import at.technikum_wien.app.models.User;
 import at.technikum_wien.httpserver.http.ContentType;
 import at.technikum_wien.httpserver.http.HttpStatus;
 import at.technikum_wien.httpserver.server.Request;
 import at.technikum_wien.httpserver.server.Response;
-import at.technikum_wien.app.models.TradingDeal;
-import at.technikum_wien.app.dal.UnitOfWork;
-import at.technikum_wien.app.dal.repository.UserRepository;
-import at.technikum_wien.app.models.User;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class TradingsController extends Controller {
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public TradingsController() {
-
     }
 
     public Response getTradingDeals(Request request) {
         try (UnitOfWork unitOfWork = new UnitOfWork()) {
-            List<User> users = (List<User>) new UserRepository(unitOfWork).findAllUsers();
-            List<TradingDeal> tradingDeals = new ArrayList<>();
+            TradingDealRepository tradingDealRepository = new TradingDealRepository(unitOfWork);
+            List<TradingDeal> tradingDeals = tradingDealRepository.findAll();
 
-            for (User user : users) {
-                tradingDeals.addAll(user.getTradingDeals());
-            }
-
-            String tradingDealsJSON = this.getObjectMapper().writeValueAsString(tradingDeals);
+            String tradingDealsJSON = this.objectMapper.writeValueAsString(tradingDeals);
             unitOfWork.commitTransaction();
             return new Response(
                     HttpStatus.OK,
@@ -56,67 +56,14 @@ public class TradingsController extends Controller {
                 );
             }
 
-            TradingDeal tradingDeal = this.getObjectMapper().readValue(request.getBody(), TradingDeal.class);
-            user.addTradingDeal(tradingDeal);
-            new UserRepository(unitOfWork).update(user);
+            TradingDeal tradingDeal = this.objectMapper.readValue(request.getBody(), TradingDeal.class);
+            tradingDeal.setOwnerId(user.getID());
+            new TradingDealRepository(unitOfWork).save(tradingDeal);
             unitOfWork.commitTransaction();
             return new Response(
                     HttpStatus.CREATED,
                     ContentType.JSON,
                     "{ \"message\": \"Trading deal created successfully\" }"
-            );
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new Response(
-                    HttpStatus.INTERNAL_SERVER_ERROR,
-                    ContentType.JSON,
-                    "{ \"message\" : \"Internal Server Error\" }"
-            );
-        }
-    }
-
-    public Response trade(Request request) {
-        try (UnitOfWork unitOfWork = new UnitOfWork()) {
-            String token = request.getHeaders().getHeader("Authorization").replace("Bearer ", "");
-            User user = new UserRepository(unitOfWork).findUserByToken(token);
-            if (user == null) {
-                return new Response(
-                        HttpStatus.UNAUTHORIZED,
-                        ContentType.JSON,
-                        "{ \"message\": \"Unauthorized\" }"
-                );
-            }
-
-            String tradingDealId = request.getPathParts().get(1);
-            TradingDeal tradingDeal = findTradingDealById(tradingDealId, unitOfWork);
-            if (tradingDeal == null) {
-                return new Response(
-                        HttpStatus.NOT_FOUND,
-                        ContentType.JSON,
-                        "{ \"message\": \"Trading deal not found\" }"
-                );
-            }
-
-            User tradePartner = new UserRepository(unitOfWork).findUserByToken(tradingDeal.getPartnerToken());
-            if (tradePartner == null) {
-                return new Response(
-                        HttpStatus.NOT_FOUND,
-                        ContentType.JSON,
-                        "{ \"message\": \"Trade partner not found\" }"
-                );
-            }
-
-            // Use tradeCard method to perform the trade
-            user.tradeCard(tradingDeal.getOfferedCard(), tradePartner);
-
-            new UserRepository(unitOfWork).update(user);
-            new UserRepository(unitOfWork).update(tradePartner);
-
-            unitOfWork.commitTransaction();
-            return new Response(
-                    HttpStatus.OK,
-                    ContentType.JSON,
-                    "{ \"message\": \"Trade successful\" }"
             );
         } catch (Exception e) {
             e.printStackTrace();
@@ -141,7 +88,7 @@ public class TradingsController extends Controller {
             }
 
             String tradingDealId = request.getPathParts().get(1);
-            TradingDeal tradingDeal = findTradingDealById(tradingDealId, unitOfWork);
+            TradingDeal tradingDeal = new TradingDealRepository(unitOfWork).findById(UUID.fromString(tradingDealId));
             if (tradingDeal == null) {
                 return new Response(
                         HttpStatus.NOT_FOUND,
@@ -150,8 +97,15 @@ public class TradingsController extends Controller {
                 );
             }
 
-            user.removeTradingDeal(tradingDeal);
-            new UserRepository(unitOfWork).update(user);
+            if (tradingDeal.getOwnerId() != user.getID()) {
+                return new Response(
+                        HttpStatus.FORBIDDEN,
+                        ContentType.JSON,
+                        "{ \"message\": \"You are not the owner of this trading deal\" }"
+                );
+            }
+
+            new TradingDealRepository(unitOfWork).delete(UUID.fromString(tradingDealId));
             unitOfWork.commitTransaction();
             return new Response(
                     HttpStatus.OK,
@@ -168,15 +122,94 @@ public class TradingsController extends Controller {
         }
     }
 
-    private TradingDeal findTradingDealById(String tradingDealId, UnitOfWork unitOfWork) {
-        List<User> users = (List<User>) new UserRepository(unitOfWork).findAllUsers();
-        for (User user : users) {
-            for (TradingDeal deal : user.getTradingDeals()) {
-                if (deal.getId().equals(tradingDealId)) {
-                    return deal;
-                }
+    public Response executeTradingDeal(Request request) {
+        try (UnitOfWork unitOfWork = new UnitOfWork()) {
+            String token = request.getHeaders().getHeader("Authorization").replace("Bearer ", "");
+            User buyer = new UserRepository(unitOfWork).findUserByToken(token);
+            if (buyer == null) {
+                return new Response(
+                        HttpStatus.UNAUTHORIZED,
+                        ContentType.JSON,
+                        "{ \"message\": \"Unauthorized\" }"
+                );
             }
+
+            String tradingDealId = request.getPathParts().get(1);
+            TradingDeal tradingDeal = new TradingDealRepository(unitOfWork).findById(UUID.fromString(tradingDealId));
+            if (tradingDeal == null) {
+                return new Response(
+                        HttpStatus.NOT_FOUND,
+                        ContentType.JSON,
+                        "{ \"message\": \"Trading deal not found\" }"
+                );
+            }
+
+            if (tradingDeal.getOwnerId() == buyer.getID()) {
+                return new Response(
+                        HttpStatus.BAD_REQUEST,
+                        ContentType.JSON,
+                        "{ \"message\": \"You cannot trade with yourself\" }"
+                );
+            }
+
+            UUID offeredCardId = this.objectMapper.readValue(request.getBody(), UUID.class);
+            CardRepository cardRepository = new CardRepository(unitOfWork);
+            Card offeredCard = cardRepository.findById(offeredCardId);
+            if (offeredCard == null) {
+                return new Response(
+                        HttpStatus.BAD_REQUEST,
+                        ContentType.JSON,
+                        "{ \"message\": \"Offered card not found in database\" }"
+                );
+            }
+
+            if (!offeredCard.getType().equalsIgnoreCase(tradingDeal.getType()) || offeredCard.getDamage() < tradingDeal.getMinimumDamage()) {
+                return new Response(
+                        HttpStatus.BAD_REQUEST,
+                        ContentType.JSON,
+                        "{ \"message\": \"Offered card does not meet the requirements\" }"
+                );
+            }
+
+            UserRepository userRepository = new UserRepository(unitOfWork);
+            User owner = userRepository.findUserById(tradingDeal.getOwnerId());
+            if (owner == null) {
+                return new Response(
+                        HttpStatus.NOT_FOUND,
+                        ContentType.JSON,
+                        "{ \"message\": \"Owner not found\" }"
+                );
+            }
+
+            Card cardToTrade = cardRepository.findById(tradingDeal.getCardToTrade());
+            if (cardToTrade == null) {
+                return new Response(
+                        HttpStatus.NOT_FOUND,
+                        ContentType.JSON,
+                        "{ \"message\": \"Card to trade not found in database\" }"
+                );
+            }
+
+            buyer.tradeCard(offeredCard, owner);
+            owner.tradeCard(cardToTrade, buyer);
+
+            userRepository.update(buyer);
+            userRepository.update(owner);
+            new TradingDealRepository(unitOfWork).delete(tradingDeal.getId());
+            unitOfWork.commitTransaction();
+
+            return new Response(
+                    HttpStatus.OK,
+                    ContentType.JSON,
+                    "{ \"message\": \"Trade executed successfully\" }"
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new Response(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    ContentType.JSON,
+                    "{ \"message\" : \"Internal Server Error\" }"
+            );
         }
-        return null;
     }
 }

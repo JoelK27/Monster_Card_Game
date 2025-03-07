@@ -13,4 +13,8 @@ public class SpellCard extends Card {
         this.spellEffect = spellEffect;
     }
 
+    @Override
+    public String getType() {
+        return "Spell";
+    }
 }
